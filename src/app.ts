@@ -1,0 +1,279 @@
+// // prisma/schema.prisma
+// generator client {
+//     provider        = "prisma-client-js"
+//     previewFeatures = ["multiSchema"]
+//   }
+  
+//   datasource db {
+//     provider = "postgresql"
+//     url      = env("DATABASE_URL")
+//     schemas  = ["auth", "public"]
+//   }
+  
+//   model blog_images {
+//     id        Int    @id @default(autoincrement())
+//     blog_id   Int?
+//     image_url String
+//     blogs     blogs? @relation(fields: [blog_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model blog_types {
+//     id          Int     @id @default(autoincrement())
+//     name        String  @unique @db.VarChar(100)
+//     image_url   String?
+//     description String?
+//     blogs       blogs[]
+//     @@schema("auth")
+//   }
+  
+//   model blogs {
+//     id                      Int           @id @default(autoincrement())
+//     title                   String        @db.VarChar(255)
+//     description             String
+//     content                 String
+//     image_url               String?
+//     author_id               Int?
+//     blog_type_id            Int?
+//     created_at              DateTime?     @default(now()) @db.Timestamp(6)
+//     hero_image              String?
+//     blog_image_one          String?
+//     blog_image_two          String?
+//     blog_image_three        String?
+//     author_avatar           String?
+//     epigraph                String?
+//     first_paragraph         String?
+//     second_paragraph        String?
+//     third_paragraph         String?
+//     fourth_paragraph        String?
+//     fifth_paragraph         String?
+//     annotation_image_one    String?
+//     annotation_image_two    String?
+//     annotation_image_three  String?
+//     annotation_image_four   String?
+//     annotation_image_five   String?
+//     point_one_title         String?       @db.VarChar(255)
+//     point_one_description   String?
+//     point_two_title         String?       @db.VarChar(255)
+//     point_two_description   String?
+//     point_three_title       String?       @db.VarChar(255)
+//     point_three_description String?
+//     point_four_title        String?       @db.VarChar(255)
+//     point_four_description  String?
+//     point_five_title        String?       @db.VarChar(255)
+//     point_five_description  String?
+//     categories              String?       @db.VarChar(255)
+//     more_blogs              String?
+//     meta_description        String?
+//     keywords                String?
+//     meta_author             String?       @db.VarChar(255)
+//     meta_og_title           String?       @db.VarChar(255)
+//     meta_og_url             String?
+//     meta_og_image           String?
+//     meta_facebook_id        String?
+//     meta_site_name          String?
+//     meta_post_twitter       String?
+//     status                  String?       @default("visible") @db.VarChar(20)
+//     blog_images             blog_images[]
+//     users                   users?        @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     blog_types              blog_types?   @relation(fields: [blog_type_id], references: [id], onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model cart {
+//     id         Int       @id @default(autoincrement())
+//     user_id    Int?
+//     product_id Int?
+//     quantity   Int
+//     price      Decimal   @db.Decimal(10, 2)
+//     created_at DateTime? @default(now()) @db.Timestamp(6)
+//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model categories {
+//     id       Int        @id @default(autoincrement())
+//     name     String     @unique @db.VarChar(100)
+//     products products[]
+//     @@schema("auth")
+//   }
+  
+//   model financials {
+//     id          Int       @id @default(autoincrement())
+//     order_id    Int?
+//     type        String?   @db.VarChar(50)
+//     amount      Decimal   @db.Decimal(10, 2)
+//     description String?
+//     created_at  DateTime? @default(now()) @db.Timestamp(6)
+//     orders      orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model order_items {
+//     id         Int       @id @default(autoincrement())
+//     order_id   Int?
+//     product_id Int?
+//     quantity   Int
+//     price      Decimal   @db.Decimal(10, 2)
+//     orders     orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model orders {
+//     id           Int           @id @default(autoincrement())
+//     user_id      Int?
+//     total_price  Decimal       @db.Decimal(10, 2)
+//     status       String?       @default("Pending") @db.VarChar(50)
+//     created_at   DateTime?     @default(now()) @db.Timestamp(6)
+//     browser_used String?       @db.VarChar(50)
+//     financials   financials[]
+//     order_items  order_items[]
+//     users        users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     payments     payments[]
+//     @@schema("auth")
+//   }
+  
+//   model password_resets {
+//     id          Int       @id @default(autoincrement())
+//     user_id     Int?
+//     reset_token String    @db.VarChar(255)
+//     created_at  DateTime? @default(now()) @db.Timestamp(6)
+//     users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model payments {
+//     id             Int       @id @default(autoincrement())
+//     order_id       Int?
+//     user_id        Int?
+//     payment_method String?   @db.VarChar(50)
+//     transaction_id String    @unique @db.VarChar(255)
+//     status         String?   @default("Pending") @db.VarChar(50)
+//     created_at     DateTime? @default(now()) @db.Timestamp(6)
+//     orders         orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     users          users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model products {
+//     id                  Int           @id @default(autoincrement())
+//     name                String        @db.VarChar(255)
+//     description         String?
+//     price               Decimal       @db.Decimal(10, 2)
+//     stock_quantity      Int?          @default(0)
+//     category_id         Int?
+//     image_url           String?
+//     created_at          DateTime?     @default(now()) @db.Timestamp(6)
+//     updated_at          DateTime?     @default(now()) @db.Timestamp(6)
+//     discount_percentage Int?          @default(0)
+//     views               Int?          @default(0)
+//     cart                cart[]
+//     order_items         order_items[]
+//     categories          categories?   @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+//     reviews             reviews[]
+//     @@schema("auth")
+//   }
+  
+//   model reports {
+//     id             Int       @id @default(autoincrement())
+//     report_type    String?   @db.VarChar(50)
+//     report_content String?
+//     report_date    DateTime? @default(now()) @db.Timestamp(6)
+//     @@schema("auth")
+//   }
+  
+//   model revenue {
+//     id            Int      @id @default(autoincrement())
+//     total_income  Decimal? @default(0) @db.Decimal(15, 2)
+//     total_expense Decimal? @default(0) @db.Decimal(15, 2)
+//     net_revenue   Decimal? @default(dbgenerated("(total_income - total_expense)")) @db.Decimal(15, 2)
+//     report_month  DateTime @unique @db.Date
+//     @@schema("auth")
+//   }
+  
+//   model reviews {
+//     id         Int       @id @default(autoincrement())
+//     user_id    Int?
+//     product_id Int?
+//     rating     Int?
+//     comment    String?
+//     created_at DateTime? @default(now()) @db.Timestamp(6)
+//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model roles {
+//     id          Int          @id @default(autoincrement())
+//     name        String       @unique @db.VarChar(50)
+//     description String?
+//     user_roles  user_roles[]
+//     @@schema("auth")
+//   }
+  
+//   model sessions {
+//     id            Int       @id @default(autoincrement())
+//     user_id       Int?
+//     session_token String    @db.VarChar(255)
+//     created_at    DateTime? @default(now()) @db.Timestamp(6)
+//     users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model shipping_details {
+//     id          Int       @id @default(autoincrement())
+//     user_id     Int?
+//     full_name   String    @db.VarChar(255)
+//     country     String    @db.VarChar(100)
+//     city        String    @db.VarChar(100)
+//     street      String    @db.VarChar(255)
+//     apartment   String?   @db.VarChar(255)
+//     postal_code String    @db.VarChar(20)
+//     phone       String    @db.VarChar(20)
+//     email       String    @db.VarChar(255)
+//     created_at  DateTime? @default(now()) @db.Timestamp(6)
+//     users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model user_analytics {
+//     id         Int       @id @default(autoincrement())
+//     user_id    Int?
+//     browser    String?   @db.VarChar(50)
+//     device     String?   @db.VarChar(50)
+//     created_at DateTime? @default(now()) @db.Timestamp(6)
+//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@schema("auth")
+//   }
+  
+//   model user_roles {
+//     user_id Int
+//     role_id Int
+//     roles   roles @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     users   users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//     @@id([user_id, role_id])
+//     @@schema("auth")
+//   }
+  
+//   model users {
+//     id               Int                @id @default(autoincrement())
+//     username         String             @unique @db.VarChar(100)
+//     email            String             @unique @db.VarChar(100)
+//     password_hash    String             @db.VarChar(255)
+//     created_at       DateTime?          @default(now()) @db.Timestamp(6)
+//     updated_at       DateTime?          @default(now()) @db.Timestamp(6)
+//     role             String?            @default("user") @db.VarChar(50)
+//     blogs            blogs[]
+//     cart             cart[]
+//     orders           orders[]
+//     password_resets  password_resets[]
+//     payments         payments[]
+//     reviews          reviews[]
+//     sessions         sessions[]
+//     shipping_details shipping_details[]
+//     user_analytics   user_analytics[]
+//     user_roles       user_roles[]
+//     @@schema("auth")
+//   }
