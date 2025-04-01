@@ -61,3 +61,75 @@ start().catch(err => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import fastify, { FastifyInstance } from 'fastify';
+// import cors from '@fastify/cors';
+// import authRoutes from './routes/auth.routes';
+// import prisma from './config/db';
+
+// const app: FastifyInstance = fastify({
+//   logger: true
+// });
+
+// // Register CORS
+// app.register(cors, {
+//   origin: '*',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE']
+// });
+
+// // Register routes
+// app.register(authRoutes, { prefix: '/api/auth' });
+
+// // Health check endpoint
+// app.get('/health', async () => {
+//   return { status: 'ok' };
+// });
+
+// // Graceful shutdown
+// const start = async () => {
+//   try {
+//     await prisma.$connect();
+//     const address = await app.listen({ 
+//       port: parseInt(process.env.PORT || '3000'), 
+//       host: '0.0.0.0' 
+//     });
+//     console.log(`Server listening at ${address}`);
+//   } catch (err) {
+//     app.log.error(err);
+//     process.exit(1);
+//   }
+// };
+
+// process.on('SIGTERM', async () => {
+//   await prisma.$disconnect();
+//   await app.close();
+//   process.exit(0);
+// });
+
+// process.on('SIGINT', async () => {
+//   await prisma.$disconnect();
+//   await app.close();
+//   process.exit(0);
+// });
+
+// start().catch(err => {
+//   console.error(err);
+//   process.exit(1);
+// });

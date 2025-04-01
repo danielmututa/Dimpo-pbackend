@@ -179,7 +179,6 @@ CREATE TABLE "auth"."revenue" (
     "id" SERIAL NOT NULL,
     "total_income" DECIMAL(15,2) DEFAULT 0,
     "total_expense" DECIMAL(15,2) DEFAULT 0,
-    "net_revenue" DECIMAL(15,2) DEFAULT (total_income - total_expense),
     "report_month" DATE NOT NULL,
 
     CONSTRAINT "revenue_pkey" PRIMARY KEY ("id")

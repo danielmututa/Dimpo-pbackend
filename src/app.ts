@@ -1,279 +1,227 @@
-// // prisma/schema.prisma
-// generator client {
-//     provider        = "prisma-client-js"
-//     previewFeatures = ["multiSchema"]
-//   }
-  
-//   datasource db {
-//     provider = "postgresql"
-//     url      = env("DATABASE_URL")
-//     schemas  = ["auth", "public"]
-//   }
-  
-//   model blog_images {
-//     id        Int    @id @default(autoincrement())
-//     blog_id   Int?
-//     image_url String
-//     blogs     blogs? @relation(fields: [blog_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model blog_types {
-//     id          Int     @id @default(autoincrement())
-//     name        String  @unique @db.VarChar(100)
-//     image_url   String?
-//     description String?
-//     blogs       blogs[]
-//     @@schema("auth")
-//   }
-  
-//   model blogs {
-//     id                      Int           @id @default(autoincrement())
-//     title                   String        @db.VarChar(255)
-//     description             String
-//     content                 String
-//     image_url               String?
-//     author_id               Int?
-//     blog_type_id            Int?
-//     created_at              DateTime?     @default(now()) @db.Timestamp(6)
-//     hero_image              String?
-//     blog_image_one          String?
-//     blog_image_two          String?
-//     blog_image_three        String?
-//     author_avatar           String?
-//     epigraph                String?
-//     first_paragraph         String?
-//     second_paragraph        String?
-//     third_paragraph         String?
-//     fourth_paragraph        String?
-//     fifth_paragraph         String?
-//     annotation_image_one    String?
-//     annotation_image_two    String?
-//     annotation_image_three  String?
-//     annotation_image_four   String?
-//     annotation_image_five   String?
-//     point_one_title         String?       @db.VarChar(255)
-//     point_one_description   String?
-//     point_two_title         String?       @db.VarChar(255)
-//     point_two_description   String?
-//     point_three_title       String?       @db.VarChar(255)
-//     point_three_description String?
-//     point_four_title        String?       @db.VarChar(255)
-//     point_four_description  String?
-//     point_five_title        String?       @db.VarChar(255)
-//     point_five_description  String?
-//     categories              String?       @db.VarChar(255)
-//     more_blogs              String?
-//     meta_description        String?
-//     keywords                String?
-//     meta_author             String?       @db.VarChar(255)
-//     meta_og_title           String?       @db.VarChar(255)
-//     meta_og_url             String?
-//     meta_og_image           String?
-//     meta_facebook_id        String?
-//     meta_site_name          String?
-//     meta_post_twitter       String?
-//     status                  String?       @default("visible") @db.VarChar(20)
-//     blog_images             blog_images[]
-//     users                   users?        @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     blog_types              blog_types?   @relation(fields: [blog_type_id], references: [id], onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model cart {
-//     id         Int       @id @default(autoincrement())
-//     user_id    Int?
-//     product_id Int?
-//     quantity   Int
-//     price      Decimal   @db.Decimal(10, 2)
-//     created_at DateTime? @default(now()) @db.Timestamp(6)
-//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model categories {
-//     id       Int        @id @default(autoincrement())
-//     name     String     @unique @db.VarChar(100)
-//     products products[]
-//     @@schema("auth")
-//   }
-  
-//   model financials {
-//     id          Int       @id @default(autoincrement())
-//     order_id    Int?
-//     type        String?   @db.VarChar(50)
-//     amount      Decimal   @db.Decimal(10, 2)
-//     description String?
-//     created_at  DateTime? @default(now()) @db.Timestamp(6)
-//     orders      orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model order_items {
-//     id         Int       @id @default(autoincrement())
-//     order_id   Int?
-//     product_id Int?
-//     quantity   Int
-//     price      Decimal   @db.Decimal(10, 2)
-//     orders     orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model orders {
-//     id           Int           @id @default(autoincrement())
-//     user_id      Int?
-//     total_price  Decimal       @db.Decimal(10, 2)
-//     status       String?       @default("Pending") @db.VarChar(50)
-//     created_at   DateTime?     @default(now()) @db.Timestamp(6)
-//     browser_used String?       @db.VarChar(50)
-//     financials   financials[]
-//     order_items  order_items[]
-//     users        users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     payments     payments[]
-//     @@schema("auth")
-//   }
-  
-//   model password_resets {
-//     id          Int       @id @default(autoincrement())
-//     user_id     Int?
-//     reset_token String    @db.VarChar(255)
-//     created_at  DateTime? @default(now()) @db.Timestamp(6)
-//     users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model payments {
-//     id             Int       @id @default(autoincrement())
-//     order_id       Int?
-//     user_id        Int?
-//     payment_method String?   @db.VarChar(50)
-//     transaction_id String    @unique @db.VarChar(255)
-//     status         String?   @default("Pending") @db.VarChar(50)
-//     created_at     DateTime? @default(now()) @db.Timestamp(6)
-//     orders         orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     users          users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model products {
-//     id                  Int           @id @default(autoincrement())
-//     name                String        @db.VarChar(255)
-//     description         String?
-//     price               Decimal       @db.Decimal(10, 2)
-//     stock_quantity      Int?          @default(0)
-//     category_id         Int?
-//     image_url           String?
-//     created_at          DateTime?     @default(now()) @db.Timestamp(6)
-//     updated_at          DateTime?     @default(now()) @db.Timestamp(6)
-//     discount_percentage Int?          @default(0)
-//     views               Int?          @default(0)
-//     cart                cart[]
-//     order_items         order_items[]
-//     categories          categories?   @relation(fields: [category_id], references: [id], onUpdate: NoAction)
-//     reviews             reviews[]
-//     @@schema("auth")
-//   }
-  
-//   model reports {
-//     id             Int       @id @default(autoincrement())
-//     report_type    String?   @db.VarChar(50)
-//     report_content String?
-//     report_date    DateTime? @default(now()) @db.Timestamp(6)
-//     @@schema("auth")
-//   }
-  
-//   model revenue {
-//     id            Int      @id @default(autoincrement())
-//     total_income  Decimal? @default(0) @db.Decimal(15, 2)
-//     total_expense Decimal? @default(0) @db.Decimal(15, 2)
-//     net_revenue   Decimal? @default(dbgenerated("(total_income - total_expense)")) @db.Decimal(15, 2)
-//     report_month  DateTime @unique @db.Date
-//     @@schema("auth")
-//   }
-  
-//   model reviews {
-//     id         Int       @id @default(autoincrement())
-//     user_id    Int?
-//     product_id Int?
-//     rating     Int?
-//     comment    String?
-//     created_at DateTime? @default(now()) @db.Timestamp(6)
-//     products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model roles {
-//     id          Int          @id @default(autoincrement())
-//     name        String       @unique @db.VarChar(50)
-//     description String?
-//     user_roles  user_roles[]
-//     @@schema("auth")
-//   }
-  
-//   model sessions {
-//     id            Int       @id @default(autoincrement())
-//     user_id       Int?
-//     session_token String    @db.VarChar(255)
-//     created_at    DateTime? @default(now()) @db.Timestamp(6)
-//     users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model shipping_details {
-//     id          Int       @id @default(autoincrement())
-//     user_id     Int?
-//     full_name   String    @db.VarChar(255)
-//     country     String    @db.VarChar(100)
-//     city        String    @db.VarChar(100)
-//     street      String    @db.VarChar(255)
-//     apartment   String?   @db.VarChar(255)
-//     postal_code String    @db.VarChar(20)
-//     phone       String    @db.VarChar(20)
-//     email       String    @db.VarChar(255)
-//     created_at  DateTime? @default(now()) @db.Timestamp(6)
-//     users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model user_analytics {
-//     id         Int       @id @default(autoincrement())
-//     user_id    Int?
-//     browser    String?   @db.VarChar(50)
-//     device     String?   @db.VarChar(50)
-//     created_at DateTime? @default(now()) @db.Timestamp(6)
-//     users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@schema("auth")
-//   }
-  
-//   model user_roles {
-//     user_id Int
-//     role_id Int
-//     roles   roles @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     users   users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-//     @@id([user_id, role_id])
-//     @@schema("auth")
-//   }
-  
-//   model users {
-//     id               Int                @id @default(autoincrement())
-//     username         String             @unique @db.VarChar(100)
-//     email            String             @unique @db.VarChar(100)
-//     password_hash    String             @db.VarChar(255)
-//     created_at       DateTime?          @default(now()) @db.Timestamp(6)
-//     updated_at       DateTime?          @default(now()) @db.Timestamp(6)
-//     role             String?            @default("user") @db.VarChar(50)
-//     blogs            blogs[]
-//     cart             cart[]
-//     orders           orders[]
-//     password_resets  password_resets[]
-//     payments         payments[]
-//     reviews          reviews[]
-//     sessions         sessions[]
-//     shipping_details shipping_details[]
-//     user_analytics   user_analytics[]
-//     user_roles       user_roles[]
-//     @@schema("auth")
-//   }
+// -- Create roles table (needed for user_roles)
+// CREATE TABLE auth.roles (
+//     id SERIAL PRIMARY KEY,
+//     name VARCHAR(50) UNIQUE NOT NULL,
+//     description TEXT
+// );
+
+// -- Create users table
+// CREATE TABLE auth.users (
+//     id SERIAL PRIMARY KEY,
+//     username VARCHAR(100) UNIQUE NOT NULL,
+//     email VARCHAR(100) UNIQUE NOT NULL,
+//     password_hash VARCHAR(255) NOT NULL,
+//     created_at TIMESTAMP(6) DEFAULT NOW(),
+//     updated_at TIMESTAMP(6) DEFAULT NOW(),
+//     role VARCHAR(50) DEFAULT 'user'
+// );
+
+// -- Create user_roles junction table
+// CREATE TABLE auth.user_roles (
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     role_id INTEGER REFERENCES auth.roles(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     PRIMARY KEY (user_id, role_id)
+// );
+
+// -- Create sessions table
+// CREATE TABLE auth.sessions (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     session_token VARCHAR(255) NOT NULL,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create password_resets table
+// CREATE TABLE auth.password_resets (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     reset_token VARCHAR(255) NOT NULL,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create blog_types table
+// CREATE TABLE auth.blog_types (
+//     id SERIAL PRIMARY KEY,
+//     name VARCHAR(100) UNIQUE NOT NULL,
+//     image_url TEXT,
+//     description TEXT
+// );
+
+// -- Create blogs table
+// CREATE TABLE auth.blogs (
+//     id SERIAL PRIMARY KEY,
+//     title VARCHAR(255) NOT NULL,
+//     description TEXT NOT NULL,
+//     content TEXT NOT NULL,
+//     image_url TEXT,
+//     author_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     blog_type_id INTEGER REFERENCES auth.blog_types(id) ON UPDATE NO ACTION,
+//     created_at TIMESTAMP(6) DEFAULT NOW(),
+//     hero_image TEXT,
+//     blog_image_one TEXT,
+//     blog_image_two TEXT,
+//     blog_image_three TEXT,
+//     author_avatar TEXT,
+//     epigraph TEXT,
+//     first_paragraph TEXT,
+//     second_paragraph TEXT,
+//     third_paragraph TEXT,
+//     fourth_paragraph TEXT,
+//     fifth_paragraph TEXT,
+//     annotation_image_one TEXT,
+//     annotation_image_two TEXT,
+//     annotation_image_three TEXT,
+//     annotation_image_four TEXT,
+//     annotation_image_five TEXT,
+//     point_one_title VARCHAR(255),
+//     point_one_description TEXT,
+//     point_two_title VARCHAR(255),
+//     point_two_description TEXT,
+//     point_three_title VARCHAR(255),
+//     point_three_description TEXT,
+//     point_four_title VARCHAR(255),
+//     point_four_description TEXT,
+//     point_five_title VARCHAR(255),
+//     point_five_description TEXT,
+//     categories VARCHAR(255),
+//     more_blogs TEXT,
+//     meta_description TEXT,
+//     keywords TEXT,
+//     meta_author VARCHAR(255),
+//     meta_og_title VARCHAR(255),
+//     meta_og_url TEXT,
+//     meta_og_image TEXT,
+//     meta_facebook_id TEXT,
+//     meta_site_name TEXT,
+//     meta_post_twitter TEXT,
+//     status VARCHAR(20) DEFAULT 'visible'
+// );
+
+// -- Create blog_images table
+// CREATE TABLE auth.blog_images (
+//     id SERIAL PRIMARY KEY,
+//     blog_id INTEGER REFERENCES auth.blogs(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     image_url TEXT NOT NULL
+// );
+
+// -- Create categories table
+// CREATE TABLE auth.categories (
+//     id SERIAL PRIMARY KEY,
+//     name VARCHAR(100) UNIQUE NOT NULL
+// );
+
+// -- Create products table
+// CREATE TABLE auth.products (
+//     id SERIAL PRIMARY KEY,
+//     name VARCHAR(255) NOT NULL,
+//     description TEXT,
+//     price DECIMAL(10, 2) NOT NULL,
+//     stock_quantity INTEGER DEFAULT 0,
+//     category_id INTEGER REFERENCES auth.categories(id) ON UPDATE NO ACTION,
+//     image_url TEXT,
+//     created_at TIMESTAMP(6) DEFAULT NOW(),
+//     updated_at TIMESTAMP(6) DEFAULT NOW(),
+//     discount_percentage INTEGER DEFAULT 0,
+//     views INTEGER DEFAULT 0
+// );
+
+// -- Create reviews table
+// CREATE TABLE auth.reviews (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     product_id INTEGER REFERENCES auth.products(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     rating INTEGER,
+//     comment TEXT,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create cart table
+// CREATE TABLE auth.cart (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     product_id INTEGER REFERENCES auth.products(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     quantity INTEGER NOT NULL,
+//     price DECIMAL(10, 2) NOT NULL,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create orders table
+// CREATE TABLE auth.orders (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     total_price DECIMAL(10, 2) NOT NULL,
+//     status VARCHAR(50) DEFAULT 'Pending',
+//     created_at TIMESTAMP(6) DEFAULT NOW(),
+//     browser_used VARCHAR(50)
+// );
+
+// -- Create order_items table
+// CREATE TABLE auth.order_items (
+//     id SERIAL PRIMARY KEY,
+//     order_id INTEGER REFERENCES auth.orders(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     product_id INTEGER REFERENCES auth.products(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     quantity INTEGER NOT NULL,
+//     price DECIMAL(10, 2) NOT NULL
+// );
+
+// -- Create financials table
+// CREATE TABLE auth.financials (
+//     id SERIAL PRIMARY KEY,
+//     order_id INTEGER REFERENCES auth.orders(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     type VARCHAR(50),
+//     amount DECIMAL(10, 2) NOT NULL,
+//     description TEXT,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create payments table
+// CREATE TABLE auth.payments (
+//     id SERIAL PRIMARY KEY,
+//     order_id INTEGER REFERENCES auth.orders(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     payment_method VARCHAR(50),
+//     transaction_id VARCHAR(255) UNIQUE NOT NULL,
+//     status VARCHAR(50) DEFAULT 'Pending',
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create shipping_details table
+// CREATE TABLE auth.shipping_details (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     full_name VARCHAR(255) NOT NULL,
+//     country VARCHAR(100) NOT NULL,
+//     city VARCHAR(100) NOT NULL,
+//     street VARCHAR(255) NOT NULL,
+//     apartment VARCHAR(255),
+//     postal_code VARCHAR(20) NOT NULL,
+//     phone VARCHAR(20) NOT NULL,
+//     email VARCHAR(255) NOT NULL,
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create user_analytics table
+// CREATE TABLE auth.user_analytics (
+//     id SERIAL PRIMARY KEY,
+//     user_id INTEGER REFERENCES auth.users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+//     browser VARCHAR(50),
+//     device VARCHAR(50),
+//     created_at TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create reports table
+// CREATE TABLE auth.reports (
+//     id SERIAL PRIMARY KEY,
+//     report_type VARCHAR(50),
+//     report_content TEXT,
+//     report_date TIMESTAMP(6) DEFAULT NOW()
+// );
+
+// -- Create revenue table
+// CREATE TABLE auth.revenue (
+//     id SERIAL PRIMARY KEY,
+//     total_income DECIMAL(15, 2) DEFAULT 0,
+//     total_expense DECIMAL(15, 2) DEFAULT 0,
+//     net_revenue DECIMAL(15, 2),
+//     report_month DATE UNIQUE NOT NULL
+// );

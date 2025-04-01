@@ -10,6 +10,8 @@ datasource db {
   schemas  = ["auth", "public"]
 }
 
+
+
 model blog_images {
   id        Int    @id @default(autoincrement())
   blog_id   Int?
@@ -188,11 +190,9 @@ model revenue {
   id            Int      @id @default(autoincrement())
   total_income  Decimal? @default(0) @db.Decimal(15, 2)
   total_expense Decimal? @default(0) @db.Decimal(15, 2)
-  net_revenue   Decimal? @db.Decimal(15, 2) // Calculate in app logic
   report_month  DateTime @unique @db.Date
   @@schema("auth")
 }
-
 model reviews {
   id         Int       @id @default(autoincrement())
   user_id    Int?
