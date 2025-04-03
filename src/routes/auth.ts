@@ -32,4 +32,6 @@ export default async (app: FastifyInstance) => {
 
   // New route for getting a user by username or email
   app.get('/user', authController.getUser);
+  // http://localhost:3000/api/auth/user?username=testuser
+  
 };
