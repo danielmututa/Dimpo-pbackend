@@ -345,12 +345,45 @@ export const login = async (request: FastifyRequest, reply: FastifyReply) => {
   }
 };
 
+// export const changePassword = async (request: FastifyRequest, reply: FastifyReply) => {
+//   try {
+//     const user = request.user as users;
+//     const validatedData = changePasswordSchema.parse(request.body);
+    
+//     await authService.changePassword(user.id, validatedData);
+    
+//     reply.code(200).send({
+//       success: true,
+//       message: 'Password changed successfully'
+//     });
+//   } catch (error: any) {
+//     reply.code(400).send({
+//       success: false,
+//       error: error.message || 'Password change failed'
+//     });
+//   }
+// };
+
+// src/controllers/auth/controller.ts
+// ... (previous imports remain the same)
+
 export const changePassword = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
+    // Get authenticated user from request (added by your JWT middleware)
     const user = request.user as users;
-    const validatedData = changePasswordSchema.parse(request.body);
     
-    await authService.changePassword(user.id, validatedData);
+    // Parse request body
+    const { currentPassword, newPassword } = request.body as {
+      currentPassword: string;
+      newPassword: string;
+    };
+
+    // Call service to change password
+    await authService.changePassword(
+      user.id,
+      currentPassword,
+      newPassword
+    );
     
     reply.code(200).send({
       success: true,
@@ -363,6 +396,8 @@ export const changePassword = async (request: FastifyRequest, reply: FastifyRepl
     });
   }
 };
+
+
 
 export const forgotPassword = async (request: FastifyRequest, reply: FastifyReply) => {
   try {

@@ -26,7 +26,8 @@ export default async (app: FastifyInstance) => {
   app.post('/login', authController.login);
   
   // Protected routes
-  app.post('/change-password', { preHandler: [authenticate] }, authController.changePassword);
+  app.post('/change-password', { preHandler: [authenticate] }, authController.changePassword); // Authorization Bearer
+    
   app.post('/forgot-password', authController.forgotPassword);
   app.post('/reset-password', authController.resetPassword);
 

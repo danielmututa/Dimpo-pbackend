@@ -66,12 +66,54 @@ export const loginUser = async (data: typeof loginSchema._type): Promise<users> 
   return user;
 };
 
+// export const changePassword = async (
+//   userId: number, 
+//   data: typeof changePasswordSchema._type
+// ): Promise<void> => {
+//   const { currentPassword, newPassword } = changePasswordSchema.parse(data); // Validate with Zod
+  
+//   const user = await prisma.users.findUnique({
+//     where: { id: userId }
+//   });
+  
+//   if (!user) {
+//     throw new Error('User not found');
+//   }
+  
+//   const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+  
+//   if (!passwordMatch) {
+//     throw new Error('Current password is incorrect');
+//   }
+  
+//   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  
+//   await prisma.users.update({
+//     where: { id: userId },
+//     data: { password_hash: hashedPassword }
+//   });
+// };
+
+
+
+
+// src/services/authService.ts
+// ... (previous imports remain the same)
+
 export const changePassword = async (
   userId: number, 
-  data: typeof changePasswordSchema._type
+  currentPassword: string,
+  newPassword: string
 ): Promise<void> => {
-  const { currentPassword, newPassword } = changePasswordSchema.parse(data); // Validate with Zod
-  
+  // Input validation
+  if (!currentPassword || !newPassword) {
+    throw new Error('Both current and new password are required');
+  }
+
+  if (currentPassword === newPassword) {
+    throw new Error('New password must be different from current password');
+  }
+
   const user = await prisma.users.findUnique({
     where: { id: userId }
   });
@@ -80,19 +122,22 @@ export const changePassword = async (
     throw new Error('User not found');
   }
   
+  // Verify current password
   const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
-  
   if (!passwordMatch) {
     throw new Error('Current password is incorrect');
   }
   
+  // Hash and update new password
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-  
   await prisma.users.update({
     where: { id: userId },
     data: { password_hash: hashedPassword }
   });
 };
+
+
+
 
 export const forgotPassword = async (email: string): Promise<void> => {
   const user = await prisma.users.findUnique({
@@ -124,8 +169,31 @@ export const forgotPassword = async (email: string): Promise<void> => {
 
 
 export const resetPassword = async (data: typeof resetPasswordSchema._type): Promise<void> => {
+
   const { token, newPassword } = resetPasswordSchema.parse(data);
   
+
+
+
+// Add this to your resetPassword function
+const tokenExists = await prisma.password_resets.findFirst({
+  where: {
+    reset_token: token,
+    created_at: { gt: new Date(Date.now() - 3600000) } // 1 hour validity
+  },
+  include: { users: true }
+});
+
+if (!tokenExists) {
+  console.log('Token validation failed - checking DB records:');
+  console.log(await prisma.password_resets.findMany({
+    where: { reset_token: token }
+  }));
+  throw new Error('Invalid or expired token');
+}
+
+
+
   // 1. Find the most recent reset record (including user relation)
   const resetRecord = await prisma.password_resets.findFirst({
     where: { reset_token: token },
