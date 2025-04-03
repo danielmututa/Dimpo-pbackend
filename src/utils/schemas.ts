@@ -1,11 +1,5 @@
 import { z } from 'zod';
 
-// Password regex that requires:
-// - At least 2 numbers
-// - At least 2 special characters
-// - At least 2 uppercase letters
-// - At least 2 lowercase letters
-// - Length between 8 and 15 characters
 const passwordRegex = /^(?=(.*\d){2,})(?=(.*[!@#$%^&*()\-_=+{};:,<.>]){2,})(?=(.*[A-Z]){2,})(?=(.*[a-z]){2,}).{8,15}$/;
 
 export const registerSchema = z.object({
