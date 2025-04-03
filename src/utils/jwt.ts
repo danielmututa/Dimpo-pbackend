@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
+import { users } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
-export const generateToken = (user: User): string => {
+export const generateToken = (user: users): string => {
   return jwt.sign(
     {
       id: user.id,
