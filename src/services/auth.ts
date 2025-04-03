@@ -1,7 +1,7 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, users } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmail } from '../utils/email';
+import { sendEmail } from '../utils/types';
 import { 
   RegisterInput, 
   LoginInput,
@@ -12,11 +12,11 @@ import {
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
-export const registerUser = async (data: RegisterInput): Promise<User> => {
+export const registerUser = async (data: RegisterInput): Promise<users> => {
   const { username, email, password } = data;
   
   // Check if user already exists
-  const existingUser = await prisma.user.findFirst({
+  const existingUser = await prisma.users.findFirst({
     where: {
       OR: [
         { username },
@@ -33,7 +33,7 @@ export const registerUser = async (data: RegisterInput): Promise<User> => {
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
   
   // Create user
-  const user = await prisma.user.create({
+  const user = await prisma.users.create({
     data: {
       username,
       email,
@@ -46,7 +46,7 @@ export const registerUser = async (data: RegisterInput): Promise<User> => {
 };
 
 export const loginUser = async (email: string, password: string): Promise<User> => {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email }
   });
   
@@ -68,7 +68,7 @@ export const changePassword = async (
   currentPassword: string, 
   newPassword: string
 ): Promise<void> => {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId }
   });
   
@@ -84,14 +84,14 @@ export const changePassword = async (
   
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
   
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: { password_hash: hashedPassword }
   });
 };
 
 export const forgotPassword = async (email: string): Promise<void> => {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email }
   });
   
@@ -103,7 +103,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   const token = uuidv4();
   const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
   
-  await prisma.passwordResets.create({
+  await prisma.password_resets.create({
     data: {
       user_id: user.id,
       reset_token: token,
@@ -121,7 +121,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
 };
 
 export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
-  const resetRecord = await prisma.passwordResets.findFirst({
+  const resetRecord = await prisma.password_resets.findFirst({
     where: { reset_token: token },
     orderBy: { created_at: 'desc' }
   });
@@ -133,11 +133,11 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
   
   await prisma.$transaction([
-    prisma.user.update({
+    prisma.users.update({
       where: { id: resetRecord.user_id },
       data: { password_hash: hashedPassword }
     }),
-    prisma.passwordResets.deleteMany({
+    prisma.password_resets.deleteMany({
       where: { user_id: resetRecord.user_id }
     })
   ]);

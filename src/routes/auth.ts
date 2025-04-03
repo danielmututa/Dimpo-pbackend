@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import * as authController from '../controllers/auth.controller';
-import { authenticate } from '../middlewares/auth.middleware';
+import * as authController from '../controllers/auth/controller';
+import { authenticate } from '../middlewares/auth';
 
 export default async (app: FastifyInstance) => {
   app.post('/register', authController.register);

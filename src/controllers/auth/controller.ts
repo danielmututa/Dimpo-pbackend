@@ -5,10 +5,10 @@ import {
   changePasswordSchema,
   resetPasswordSchema,
   forgotPasswordSchema
-} from '../utils/schemas';
-import * as authService from '../services/auth.service';
-import { generateToken } from '../utils/jwt';
-import { User } from '@prisma/client';
+} from '../../utils/schemas';
+import * as authService from '../../services/auth';
+import { generateToken } from '../../utils/jwt';
+import { users } from '@prisma/client';
 
 export const register = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -66,7 +66,7 @@ export const login = async (request: FastifyRequest, reply: FastifyReply) => {
 
 export const changePassword = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
-    const user = request.user as User;
+    const user = request.user as users;
     const validatedData = changePasswordSchema.parse(request.body);
     
     await authService.changePassword(
