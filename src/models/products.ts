@@ -9,7 +9,7 @@ export const productSchema = z.object({
   id: z.number(),
   name: z.string().max(255),
   description: z.string().optional(),
-  price: z.number(), 
+  price: z.number().min(0), 
   stock_quantity: z.number().optional().default(0),
   category_id: z.number().optional(),
   image_url: z.string().optional(),
@@ -23,3 +23,5 @@ export const productSchema = z.object({
   categories: z.array(categorySchema).optional(), 
   reviews: z.array(reviewSchema).optional(), 
 });
+
+

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodToJsonSchema as zodToSchemaConverter } from 'zod-to-json-schema';
 
 const passwordRegex = /^(?=(.*\d){2,})(?=(.*[!@#$%^&*()\-_=+{};:,<.>]){2,})(?=(.*[A-Z]){2,})(?=(.*[a-z]){2,}).{8,15}$/;
 
@@ -44,3 +45,9 @@ export const resetPasswordSchema = z.object({
 export const forgotPasswordSchema = z.object({
   email: z.string().email()
 });
+
+
+export const zodToJsonSchema = (schema: z.ZodTypeAny) => {
+  const jsonSchema = zodToSchemaConverter(schema);
+  return jsonSchema.definitions ? jsonSchema.definitions[schema.description || ''] || jsonSchema : jsonSchema;
+};

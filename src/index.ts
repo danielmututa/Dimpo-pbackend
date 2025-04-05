@@ -5,6 +5,7 @@ import fastifyJwt from '@fastify/jwt'; // Note: Can use either 'jwt' or 'fastify
 import prisma from './config/db';
 import authRoutes from './routes/auth';
 import { JwtUser } from './utils/jwt';
+import productRoutes from './routes/productroute';
 
 const app: FastifyInstance = fastify({
   logger: true,
@@ -37,6 +38,8 @@ declare module '@fastify/jwt' {
 
 // 3. Register routes
 app.register(authRoutes, { prefix: '/api/auth' });
+
+app.register(productRoutes, {prefix: 'api/products'})
 
 // Health check endpoint
 app.get('/health', async () => {
