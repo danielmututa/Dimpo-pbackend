@@ -66,46 +66,15 @@ export const loginUser = async (data: typeof loginSchema._type): Promise<users> 
   return user;
 };
 
-// export const changePassword = async (
-//   userId: number, 
-//   data: typeof changePasswordSchema._type
-// ): Promise<void> => {
-//   const { currentPassword, newPassword } = changePasswordSchema.parse(data); // Validate with Zod
-  
-//   const user = await prisma.users.findUnique({
-//     where: { id: userId }
-//   });
-  
-//   if (!user) {
-//     throw new Error('User not found');
-//   }
-  
-//   const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
-  
-//   if (!passwordMatch) {
-//     throw new Error('Current password is incorrect');
-//   }
-  
-//   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-  
-//   await prisma.users.update({
-//     where: { id: userId },
-//     data: { password_hash: hashedPassword }
-//   });
-// };
 
 
 
-
-// src/services/authService.ts
-// ... (previous imports remain the same)
 
 export const changePassword = async (
   userId: number, 
   currentPassword: string,
   newPassword: string
 ): Promise<void> => {
-  // Input validation
   if (!currentPassword || !newPassword) {
     throw new Error('Both current and new password are required');
   }
@@ -122,13 +91,13 @@ export const changePassword = async (
     throw new Error('User not found');
   }
   
-  // Verify current password
+  
   const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
   if (!passwordMatch) {
     throw new Error('Current password is incorrect');
   }
   
-  // Hash and update new password
+  
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
   await prisma.users.update({
     where: { id: userId },
@@ -145,7 +114,6 @@ export const forgotPassword = async (email: string): Promise<void> => {
   });
   
   if (!user) {
-    // Don't reveal whether the email exists
     return;
   }
   
@@ -162,8 +130,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   
   // Since sendEmail is removed, log the reset link for now
   const resetLink = `http://yourfrontend.com/reset-password?token=${token}`;
-  console.log(`Password reset link: ${resetLink}`);
-  // In a real app, you'd implement email sending logic here
+
 };
 
 
@@ -185,10 +152,6 @@ const tokenExists = await prisma.password_resets.findFirst({
 });
 
 if (!tokenExists) {
-  console.log('Token validation failed - checking DB records:');
-  console.log(await prisma.password_resets.findMany({
-    where: { reset_token: token }
-  }));
   throw new Error('Invalid or expired token');
 }
 

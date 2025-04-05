@@ -1,8 +1,3 @@
-
-
-
-
-// src/controllers/auth/controller.ts
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { 
   registerSchema, 
