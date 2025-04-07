@@ -6,7 +6,7 @@ import { reviewSchema } from "./review";
 
 
 export const productSchema = z.object({
-  id: z.number(),
+//   id: z.number().int().positive(),
   name: z.string().max(255),
   description: z.string().optional(),
   price: z.number().min(0), 

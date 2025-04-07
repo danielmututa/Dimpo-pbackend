@@ -29,6 +29,10 @@ model blog_types {
   @@schema("auth")
 }
 
+
+
+
+
 model blogs {
   id                      Int           @id @default(autoincrement())
   title                   String        @db.VarChar(255)
