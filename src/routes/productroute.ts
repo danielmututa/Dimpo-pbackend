@@ -8,7 +8,7 @@ export default async (app: FastifyInstance) => {
   // Get all products
   app.get('/', productController.getProductsHandler);
   
-  app.get('/products/:id/reviews', productController.getProductHandler);
+ 
   http://localhost:3000/api/products?page=1&limit=5&category_id=1
 
   // Get single product by ID
@@ -37,6 +37,46 @@ export default async (app: FastifyInstance) => {
  
  
  
+
+
+ // Cart routes
+ app.post('/:userId/cart', {
+  handler: productController.addProductToCartHandler,
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        productId: { type: 'number' },
+        quantity: { type: 'number', minimum: 1 }
+      },
+      required: ['productId', 'quantity']
+    }
+  }
+});
+
+app.get('/:userId/cart', productController.getUserCartHandler);
+
+app.put('/:userId/cart/:cartItemId', {
+  handler: productController.updateCartItemQuantityHandler,
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        quantity: { type: 'number', minimum: 1 }
+      },
+      required: ['quantity']
+    }
+  }
+});
+
+http://localhost:3000/api/products/:userId/cart/29
+
+
+
+app.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
+
+
+
   
 
 };
