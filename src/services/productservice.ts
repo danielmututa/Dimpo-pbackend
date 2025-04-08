@@ -102,18 +102,12 @@ export const createProduct = async (data: z.infer<typeof productSchema>) => {
 
 
 
-// export const
-  // const product = await prisma.products.findUnique({
-  //   where: { id: productId },
-  //   select: { price: true, stock_quantity: true }
-  // });
-  
   
   export const addProductToCart = async (
     userId: number,
     productId: number,
     quantity: number,
-    data: Partial<z.infer<typeof productSchema>>
+    data: Partial<z.infer<typeof productSchema>> = {} // Optional product data
   ) => {
     const validatedData = productSchema.partial().parse(data);
     
@@ -177,6 +171,7 @@ export const createProduct = async (data: z.infer<typeof productSchema>) => {
   };
 
 
+ 
 
 
   export const updateCartItemQuantity = async (
@@ -197,7 +192,7 @@ export const createProduct = async (data: z.infer<typeof productSchema>) => {
       include: {
         products: {
           select: {
-            id: true, // Added id field
+            id: true,
             price: true,
             stock_quantity: true
           }

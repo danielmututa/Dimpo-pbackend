@@ -8,7 +8,7 @@ export default async (app: FastifyInstance) => {
   // Get all products
   app.get('/', productController.getProductsHandler);
   
-
+  app.get('/products/:id/reviews', productController.getProductHandler);
   http://localhost:3000/api/products?page=1&limit=5&category_id=1
 
   // Get single product by ID
@@ -30,10 +30,13 @@ export default async (app: FastifyInstance) => {
       body:zodToJsonSchema( productSchema.partial())
     }
   });
+
   
   // Delete product
   app.delete('/:id', productController.deleteProductHandler);
  
+ 
+ 
   
-  
+
 };
