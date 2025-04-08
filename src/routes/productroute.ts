@@ -8,9 +8,13 @@ export default async (app: FastifyInstance) => {
   // Get all products
   app.get('/', productController.getProductsHandler);
   
+
+  http://localhost:3000/api/products?page=1&limit=5&category_id=1
+
   // Get single product by ID
   app.get('/:id', productController.getProductHandler);
   
+  http://localhost:3000/api/products/3
   // Create new product
   app.post('/newproduct', {
     handler: productController.createProductHandler,
@@ -29,6 +33,7 @@ export default async (app: FastifyInstance) => {
   
   // Delete product
   app.delete('/:id', productController.deleteProductHandler);
+ 
   
   
 };
