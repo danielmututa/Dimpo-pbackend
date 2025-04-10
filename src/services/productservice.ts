@@ -31,7 +31,7 @@ export const getProductById = async (id: number) => {
 };
 
 // Create new product
-export const createProduct = async (data: z.infer<typeof productSchema>) => {
+export const createProduct = async ( data: z.infer<typeof productSchema>) => {
   const validatedData = productSchema.parse(data);
 
   const createData: Prisma.productsCreateInput = {
