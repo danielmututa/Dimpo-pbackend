@@ -8,16 +8,23 @@ import productRoutes from './routes/productroute';
 import blogRoutes from "./routes/blog"
 import analytics from  "./routes/analytics"
 import { JwtUser } from './utils/jwt';
+import deviceTypePlugin from './plugins/plugins';
 
 const app: FastifyInstance = fastify({
   logger: true,
 });
+
+
+
 
 // 1. First register CORS
 app.register(cors, {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
+
+
+app.register(deviceTypePlugin);
 
 // 2. Register JWT plugin (BEST PRACTICE VERSION)
 app.register(fastifyJwt, {
