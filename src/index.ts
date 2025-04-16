@@ -6,6 +6,7 @@ import prisma from './config/db';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/productroute';
 import blogRoutes from "./routes/blog"
+import analytics from  "./routes/analytics"
 import { JwtUser } from './utils/jwt';
 
 const app: FastifyInstance = fastify({
@@ -43,6 +44,8 @@ app.register(authRoutes, { prefix: '/api/auth' });
 app.register(productRoutes, {prefix: 'api/products'})
 
 app.register(blogRoutes, {prefix: 'api/blogs'})
+
+app.register(analytics, {prefix: 'api/device'})
 
 
 // Health check endpoint
