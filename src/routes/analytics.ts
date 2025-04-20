@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { AnalyticsController } from '../controllers/analytics/controller';
 import { z } from 'zod';
-
+import deviceTypePlugin from "../plugins/plugins"
 export default async (app: FastifyInstance) => {
   // Get paginated analytics (filter by device type)
   app.get('/', {

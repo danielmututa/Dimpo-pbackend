@@ -12,7 +12,6 @@ export const shippingDetailsSchema = z.object({
     phone: z.string().max(20),
     email: z.string().email().max(255),
     created_at: z.date().optional(),
-    // Relationship (optional in schema)
     user: z.object({
       id: z.number(),
       email: z.string().email()

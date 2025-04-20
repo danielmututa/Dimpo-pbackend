@@ -6,7 +6,7 @@ export const paymentSchema = z.object({
     payment_method: z.string().max(50).optional(),
     transaction_id: z.string().max(255),
     status: z.string().max(50).default("Pending"),
-    created_at: z.date().optional(),
+    // created_at: z.date().optional(),
 
   });
   

@@ -72,6 +72,37 @@ export const AnalyticsService = {
     return stats;
   },
 
+
+  // async getDeviceTypeStats() {
+  //   const stats = await prisma.userAnalytics.groupBy({
+  //     by: ['device'],
+  //     _count: {
+  //       device: true
+  //     },
+  //   });
+    
+  //   const result = {
+  //     mobile: 0,
+  //     tablet: 0,
+  //     desktop: 0,
+  //     other: 0,
+  //     unknown: 0
+  //   };
+    
+  //   stats.forEach(stat => {
+  //     const deviceType = stat.device?.toLowerCase() || 'unknown';
+  //     if (deviceType in result) {
+  //       result[deviceType as keyof typeof result] = stat._count.device;
+  //     } else {
+  //       result.other += stat._count.device;
+  //     }
+  //   });
+    
+  //   return result;
+  // }
+
+  
+
   getDeviceType(device: string | null): keyof DeviceStats {
     if (!device) return 'unknown';
     

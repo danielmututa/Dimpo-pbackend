@@ -10,11 +10,13 @@ export const financialTypeEnum = z.enum([
   export const financialSchema = z.object({
   
     order_id: z.number().nullable().optional(),
-    type: financialTypeEnum,
+    type: z.string().optional(),
     amount: z.number(),
     description: z.string().optional(),
-    created_at: z.date().optional()
+     created_at: z.coerce.date().optional(),
+
   });
+
   
   export type Financial = z.infer<typeof financialSchema>;
   

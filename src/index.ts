@@ -7,8 +7,9 @@ import authRoutes from './routes/auth';
 import productRoutes from './routes/productroute';
 import blogRoutes from "./routes/blog"
 import analytics from  "./routes/analytics"
+import oderRoutes from "./routes/order"
 import { JwtUser } from './utils/jwt';
-import deviceTypePlugin from './plugins/plugins';
+// import deviceTypePlugin from './plugins/plugins';
 
 const app: FastifyInstance = fastify({
   logger: true,
@@ -24,7 +25,7 @@ app.register(cors, {
 });
 
 
-app.register(deviceTypePlugin);
+// 
 
 // 2. Register JWT plugin (BEST PRACTICE VERSION)
 app.register(fastifyJwt, {
@@ -52,7 +53,9 @@ app.register(productRoutes, {prefix: 'api/products'})
 
 app.register(blogRoutes, {prefix: 'api/blogs'})
 
-app.register(analytics, {prefix: 'api/device'})
+app.register(analytics, {prefix: '/api/analytics'})
+
+app.register(oderRoutes, {prefix: '/api/order'})
 
 
 // Health check endpoint

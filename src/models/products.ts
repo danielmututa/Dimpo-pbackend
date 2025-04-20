@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { cartSchema } from "./cart";
 import { orderItemSchema } from "./orderitem";
+import {orderSchema} from "./order"
 // import { categorySchema } from "./category";
 import { reviewSchema } from "./review";
 
