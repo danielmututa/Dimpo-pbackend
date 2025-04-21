@@ -51,3 +51,4 @@ export const zodToJsonSchema = (schema: z.ZodTypeAny) => {
   const jsonSchema = zodToSchemaConverter(schema);
   return jsonSchema.definitions ? jsonSchema.definitions[schema.description || ''] || jsonSchema : jsonSchema;
 };
+

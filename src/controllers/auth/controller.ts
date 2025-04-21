@@ -178,3 +178,52 @@ export const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
     });
   }
 };
+
+
+export const getAllUsers = async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const users = await authService.getAllUsers();
+    
+    reply.code(200).send({
+      success: true,
+      data: users
+    });
+  } catch (error: any) {
+    reply.code(500).send({
+      success: false,
+      error: error.message || 'Failed to fetch users'
+    });
+  }
+};
+
+
+export const deleteUser = async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    // Get the authenticated user making the request
+    const requestingUser = request.user as users;
+    
+    // Get the user ID to delete from route params
+    const { id } = request.params as { id: string };
+    const userIdToDelete = parseInt(id);
+
+    // Validate the ID
+    if (isNaN(userIdToDelete)) {
+      return reply.code(400).send({ success: false, error: 'Invalid user ID' });
+    }
+
+    
+
+    await authService.deleteUser(userIdToDelete);
+    
+    reply.code(200).send({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error: any) {
+    const statusCode = error.message.includes('not found') ? 404 : 500;
+    reply.code(statusCode).send({
+      success: false,
+      error: error.message || 'Failed to delete user'
+    });
+  }
+};

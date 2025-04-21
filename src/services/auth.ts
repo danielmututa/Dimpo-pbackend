@@ -119,6 +119,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   
   const token = uuidv4();
   const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
+  // const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000; 
   
   await prisma.password_resets.create({
     data: {
@@ -214,4 +215,67 @@ export const getUser = async (identifier: { username?: string | undefined; email
   }
   
   return user;
+};
+
+
+// export const getAllUsers = async (): Promise<users[]> => {
+//   const users = await prisma.users.findMany({
+//     select: {
+//       id: true,
+//       username: true,
+//       email: true,
+//       role: true,
+//       created_at: true,
+//       updated_at: true
+//       // Exclude password_hash for security
+//     },
+//     orderBy: {
+//       created_at: 'desc'
+//     }
+//   });
+  
+//   return users;
+// };
+
+// src/services/auth.ts
+export const getAllUsers = async (): Promise<Pick<users, 'id' | 'username' | 'email' | 'role' | 'created_at' | 'updated_at'>[]> => {
+  const users = await prisma.users.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      created_at: true,
+      updated_at: true
+      // Explicitly exclude sensitive fields
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  
+  return users;
+};
+
+export const deleteUser = async (userId: number): Promise<void> => {
+  // First check if user exists
+  const user = await prisma.users.findUnique({
+    where: { id: userId }
+  });
+  
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Use a transaction to ensure all related data is deleted
+  await prisma.$transaction([
+    // Delete any password reset tokens first
+    prisma.password_resets.deleteMany({
+      where: { user_id: userId }
+    }),
+    // Then delete the user
+    prisma.users.delete({
+      where: { id: userId }
+    })
+  ]);
 };
