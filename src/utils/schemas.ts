@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema as zodToSchemaConverter } from 'zod-to-json-schema';
 
-const passwordRegex = /^(?=(.*\d){2,})(?=(.*[!@#$%^&*()\-_=+{};:,<.>]){2,})(?=(.*[A-Z]){2,})(?=(.*[a-z]){2,}).{8,15}$/;
+const passwordRegex = /^(?=(.*\d){2,})(?=(.*[!@?#$%^&*()\-_=+{};:,<.>]){2,})(?=(.*[A-Z]){2,})(?=(.*[a-z]){2,}).{8,15}$/;
 
 export const registerSchema = z.object({
   username: z.string().min(3).max(100),

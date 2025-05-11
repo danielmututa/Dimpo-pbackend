@@ -1,11 +1,9 @@
-import { categories } from './../../node_modules/.prisma/client/index.d';
 import { PrismaClient, Prisma } from "@prisma/client";
 import { productSchema } from "../models/products";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
 
-// Get all products
 export const getAllProducts = async () => {
   return await prisma.products.findMany({
     include: {
@@ -17,7 +15,6 @@ export const getAllProducts = async () => {
   });
 };
 
-// Get single product by ID
 export const getProductById = async (id: number) => {
   return await prisma.products.findUnique({
     where: { id },
@@ -30,15 +27,91 @@ export const getProductById = async (id: number) => {
   });
 };
 
-// Create new product
-export const createProduct = async ( data: z.infer<typeof productSchema>) => {
+// export const createProduct = async (
+//   data: z.infer<typeof productSchema>,
+//   file?: { filename: string }
+// ) => {
+//   const validatedData = productSchema.parse(data);
+
+//   const createData: Prisma.productsCreateInput = {
+//     name: validatedData.name,
+//     description: validatedData.description ?? null,
+//     price: validatedData.price,
+//     image_url: file ? `/Uploads/${file.filename}` : null,
+//     stock_quantity: validatedData.stock_quantity ?? 0,
+//     discount_percentage: validatedData.discount_percentage ?? 0,
+//     views: validatedData.views ?? 0,
+//     created_at: validatedData.created_at ?? new Date(),
+//     updated_at: validatedData.updated_at ?? new Date(),
+//   };
+
+//   if (validatedData.category_name) {
+//     createData.categories = {
+//       connectOrCreate: {
+//         where: { name: validatedData.category_name },
+//         create: { name: validatedData.category_name },
+//       },
+//     };
+//   }
+
+//   if (validatedData.cart && validatedData.cart.length > 0) {
+//     createData.cart = {
+//       create: validatedData.cart.map((item) => ({
+//         user_id: item.user_id,
+//         quantity: item.quantity,
+//         price: validatedData.price * item.quantity,
+//         created_at: item.created_at ?? new Date(),
+//       })),
+//     };
+//   }
+
+//   if (validatedData.reviews && validatedData.reviews.length > 0) {
+//     createData.reviews = {
+//       create: validatedData.reviews.map((item) => ({
+//         user_id: item.user_id ?? null,
+//         rating: item.rating ?? null,
+//         comment: item.comment ?? "",
+//         created_at: item.created_at ?? new Date(),
+//       })),
+//     };
+//   }
+
+//   if (validatedData.order_items && validatedData.order_items.length > 0) {
+//     createData.order_items = {
+//       create: validatedData.order_items.map((item) => ({
+//         order_id: item.order_id,
+//         quantity: item.quantity,
+//         price: validatedData.price,
+//       })),
+//     };
+//   }
+
+//   return await prisma.products.create({
+//     data: createData,
+//     include: {
+//       categories: true,
+//       reviews: true,
+//       cart: true,
+//       order_items: true,
+//     },
+//   });
+// };
+
+// Other functions (addProductToCart, updateCartItemQuantity, deleteCartItem, getUserCart, updateProduct, deleteProduct) remain unchanged
+// ... (keep as provided in your original code)
+
+
+export const createProduct = async (
+  data: z.infer<typeof productSchema>,
+  file?: { filename: string }
+) => {
   const validatedData = productSchema.parse(data);
 
   const createData: Prisma.productsCreateInput = {
     name: validatedData.name,
     description: validatedData.description ?? null,
     price: validatedData.price,
-    image_url: validatedData.image_url ?? null,
+    image_url: file ? `/Uploads/${file.filename}` : null,
     stock_quantity: validatedData.stock_quantity ?? 0,
     discount_percentage: validatedData.discount_percentage ?? 0,
     views: validatedData.views ?? 0,
@@ -100,10 +173,7 @@ export const createProduct = async ( data: z.infer<typeof productSchema>) => {
 
 
 
-
-
-  
-  export const addProductToCart = async (
+export const addProductToCart = async (
     userId: number,
     productId: number,
     quantity: number,

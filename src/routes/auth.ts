@@ -18,6 +18,7 @@ export default async (app: FastifyInstance) => {
 
 
   app.get('/users', { preHandler: [authenticate] }, authController.getAllUsers); // Get all users (protected)
+  // app.get('/users', authController.getAllUsers);
   app.delete('/users/:id', { preHandler: [authenticate] }, authController.deleteUser); // Delete user by ID (protected)
 
   // Example URLs:

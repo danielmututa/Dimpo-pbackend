@@ -9,6 +9,9 @@ import blogRoutes from "./routes/blog"
 import analytics from  "./routes/analytics"
 import oderRoutes from "./routes/order"
 import { JwtUser } from './utils/jwt';
+import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 // import deviceTypePlugin from './plugins/plugins';
 
 const app: FastifyInstance = fastify({
@@ -19,12 +22,30 @@ const app: FastifyInstance = fastify({
 
 
 // 1. First register CORS
+// app.register(cors, {
+//   origin: '*',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+// });
+
+
+
 app.register(cors, {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: 'http://localhost:5173', // Your frontend URL (replace if different)
+  credentials: true, // IMPORTANT - enables cookies/credentials
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Add OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization'],
+
 });
 
+app.register(multipart);
 
+
+
+// ✅ (Optional) Serve image uploads
+app.register(fastifyStatic, {
+  root: path.join(__dirname, '../uploads'),
+  prefix: '/uploads/',
+});
 // 
 
 // 2. Register JWT plugin (BEST PRACTICE VERSION)
