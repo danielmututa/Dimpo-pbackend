@@ -428,4 +428,21 @@ export const deleteProduct = async (id: number) => {
 };
 
 
+export const getAllProductImages = async () => {
+  const products = await prisma.products.findMany({
+    where: {
+      image_url: {
+        not: null, // Only include products with an image_url
+      },
+    },
+    select: {
+      image_url: true, // Only fetch the image_url field
+    },
+  });
+  return products.map((product) => product.image_url); // Return an array of image URLs
+};
+
+
+
+
 
