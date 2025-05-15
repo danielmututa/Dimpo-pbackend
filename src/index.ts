@@ -169,6 +169,8 @@ app.register(fastifyStatic, {
   },
 });
 
+
+
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-very-secure-secret',
   cookie: {
