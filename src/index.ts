@@ -134,6 +134,8 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 
 // Load environment variables from .env file
+
+
 dotenv.config();
 
 const app: FastifyInstance = fastify({
