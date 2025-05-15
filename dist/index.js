@@ -108,6 +108,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // }
 const fastify_1 = __importDefault(require("fastify"));
 const cors_1 = __importDefault(require("@fastify/cors"));
+// import cors from 'fastify-cors';
 const jwt_1 = __importDefault(require("@fastify/jwt"));
 const db_1 = __importDefault(require("./config/db"));
 const auth_1 = __importDefault(require("./routes/auth"));
@@ -116,7 +117,7 @@ const blog_1 = __importDefault(require("./routes/blog"));
 const analytics_1 = __importDefault(require("./routes/analytics"));
 const order_1 = __importDefault(require("./routes/order"));
 const multipart_1 = __importDefault(require("@fastify/multipart"));
-const fastify_static_1 = __importDefault(require("fastify-static"));
+const static_1 = __importDefault(require("@fastify/static"));
 const path_1 = __importDefault(require("path"));
 const app = (0, fastify_1.default)({
     logger: true,
@@ -129,7 +130,7 @@ app.register(cors_1.default, {
 });
 app.register(multipart_1.default);
 // Serve image uploads
-app.register(fastify_static_1.default, {
+app.register(static_1.default, {
     root: path_1.default.join(__dirname, './Uploads'), // Ensure this matches upload path
     prefix: '/Uploads/',
     setHeaders: (res) => {
