@@ -134,6 +134,8 @@
 
 import fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import cors from '@fastify/cors';
+// import cors from 'fastify-cors';
+
 import fastifyJwt from '@fastify/jwt';
 import prisma from './config/db';
 import authRoutes from './routes/auth';

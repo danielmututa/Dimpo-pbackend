@@ -1,3 +1,226 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteUser = exports.getAllUsers = exports.getUser = exports.resetPassword = exports.forgotPassword = exports.changePassword = exports.loginUser = exports.registerUser = void 0;
+// src/services/authService.ts
+const client_1 = require("@prisma/client");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const uuid_1 = require("uuid");
+const schemas_1 = require("../utils/schemas"); // Adjust path based on your structure
+const prisma = new client_1.PrismaClient();
+const SALT_ROUNDS = 10;
+const registerUser = async (data) => {
+    const { username, email, password } = schemas_1.registerSchema.parse(data); // Validate with Zod
+    // Check if user already exists
+    const existingUser = await prisma.users.findFirst({
+        where: {
+            OR: [
+                { username },
+                { email }
+            ]
+        }
+    });
+    if (existingUser) {
+        throw new Error('Username or email already in use');
+    }
+    // Hash password
+    const hashedPassword = await bcryptjs_1.default.hash(password, SALT_ROUNDS);
+    // Create user
+    const user = await prisma.users.create({
+        data: {
+            username,
+            email,
+            password_hash: hashedPassword,
+            role: 'user' // Default role
+        }
+    });
+    return user;
+};
+exports.registerUser = registerUser;
+const loginUser = async (data) => {
+    const { email, password } = schemas_1.loginSchema.parse(data); // Validate with Zod
+    const user = await prisma.users.findUnique({
+        where: { email }
+    });
+    if (!user) {
+        throw new Error('Invalid credentials');
+    }
+    const passwordMatch = await bcryptjs_1.default.compare(password, user.password_hash);
+    if (!passwordMatch) {
+        throw new Error('Invalid credentials');
+    }
+    return user;
+};
+exports.loginUser = loginUser;
+const changePassword = async (userId, currentPassword, newPassword) => {
+    if (!currentPassword || !newPassword) {
+        throw new Error('Both current and new password are required');
+    }
+    if (currentPassword === newPassword) {
+        throw new Error('New password must be different from current password');
+    }
+    const user = await prisma.users.findUnique({
+        where: { id: userId }
+    });
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const passwordMatch = await bcryptjs_1.default.compare(currentPassword, user.password_hash);
+    if (!passwordMatch) {
+        throw new Error('Current password is incorrect');
+    }
+    const hashedPassword = await bcryptjs_1.default.hash(newPassword, SALT_ROUNDS);
+    await prisma.users.update({
+        where: { id: userId },
+        data: { password_hash: hashedPassword }
+    });
+};
+exports.changePassword = changePassword;
+const forgotPassword = async (email) => {
+    const user = await prisma.users.findUnique({
+        where: { email }
+    });
+    if (!user) {
+        return;
+    }
+    const token = (0, uuid_1.v4)();
+    const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
+    // const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000; 
+    await prisma.password_resets.create({
+        data: {
+            user_id: user.id,
+            reset_token: token,
+            created_at: expiresAt
+        }
+    });
+    // Since sendEmail is removed, log the reset link for now
+    const resetLink = `http://yourfrontend.com/reset-password?token=${token}`;
+};
+exports.forgotPassword = forgotPassword;
+const resetPassword = async (data) => {
+    const { token, newPassword } = schemas_1.resetPasswordSchema.parse(data);
+    // Add this to your resetPassword function
+    const tokenExists = await prisma.password_resets.findFirst({
+        where: {
+            reset_token: token,
+            created_at: { gt: new Date(Date.now() - 3600000) } // 1 hour validity
+        },
+        include: { users: true }
+    });
+    if (!tokenExists) {
+        throw new Error('Invalid or expired token');
+    }
+    // 1. Find the most recent reset record (including user relation)
+    const resetRecord = await prisma.password_resets.findFirst({
+        where: { reset_token: token },
+        orderBy: { created_at: 'desc' },
+        include: { users: true }
+    });
+    // 2. Comprehensive validation with proper null checks
+    if (!resetRecord?.user_id || !resetRecord.created_at || !resetRecord.users) {
+        if (resetRecord?.user_id) {
+            // Clean up orphaned records if user_id exists but user doesn't
+            await prisma.password_resets.deleteMany({ where: { user_id: resetRecord.user_id } });
+        }
+        throw new Error('Invalid or expired token');
+    }
+    // 3. Check token expiration (1 hour validity)
+    const tokenExpiration = new Date(resetRecord.created_at.getTime() + 3600000);
+    if (new Date() > tokenExpiration) {
+        await prisma.password_resets.deleteMany({ where: { user_id: resetRecord.user_id } });
+        throw new Error('Token has expired');
+    }
+    // 4. Update password and clean up all user's reset tokens
+    await prisma.$transaction([
+        prisma.users.update({
+            where: { id: resetRecord.user_id },
+            data: {
+                password_hash: await bcryptjs_1.default.hash(newPassword, SALT_ROUNDS)
+            }
+        }),
+        prisma.password_resets.deleteMany({
+            where: { user_id: resetRecord.user_id }
+        })
+    ]);
+};
+exports.resetPassword = resetPassword;
+// Updated function to get a user by username or email
+const getUser = async (identifier) => {
+    const user = await prisma.users.findFirst({
+        where: {
+            OR: [
+                identifier.username !== undefined ? { username: identifier.username } : {},
+                identifier.email !== undefined ? { email: identifier.email } : {}
+            ].filter(Boolean) // Ensure type safety
+        },
+        select: {
+            username: true,
+            email: true
+        }
+    });
+    if (!user) {
+        return null;
+    }
+    return user;
+};
+exports.getUser = getUser;
+// export const getAllUsers = async (): Promise<users[]> => {
+//   const users = await prisma.users.findMany({
+//     select: {
+//       id: true,
+//       username: true,
+//       email: true,
+//       role: true,
+//       created_at: true,
+//       updated_at: true
+//       // Exclude password_hash for security
+//     },
+//     orderBy: {
+//       created_at: 'desc'
+//     }
+//   });
+//   return users;
+// };
+// src/services/auth.ts
+const getAllUsers = async () => {
+    const users = await prisma.users.findMany({
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true,
+            created_at: true,
+            updated_at: true
+            // Explicitly exclude sensitive fields
+        },
+        orderBy: {
+            created_at: 'desc'
+        }
+    });
+    return users;
+};
+exports.getAllUsers = getAllUsers;
+const deleteUser = async (userId) => {
+    // First check if user exists
+    const user = await prisma.users.findUnique({
+        where: { id: userId }
+    });
+    if (!user) {
+        throw new Error('User not found');
+    }
+    // Use a transaction to ensure all related data is deleted
+    await prisma.$transaction([
+        // Delete any password reset tokens first
+        prisma.password_resets.deleteMany({
+            where: { user_id: userId }
+        }),
+        // Then delete the user
+        prisma.users.delete({
+            where: { id: userId }
+        })
+    ]);
+};
+exports.deleteUser = deleteUser;
 //# sourceMappingURL=auth.js.map
