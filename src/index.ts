@@ -242,6 +242,9 @@ declare module 'fastify' {
 
 
 
+
+
+
 // {
 //   "name": "server",
 //   "version": "1.0.0",
