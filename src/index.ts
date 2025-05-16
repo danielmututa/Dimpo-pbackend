@@ -132,7 +132,7 @@ import { JwtUser } from './utils/jwt';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
-import fs from 'fs';
+
 
 // Load environment variables from .env file
 
@@ -166,10 +166,6 @@ app.register(fastifyStatic, {
 
 
 
-const uploadsDir = path.join(__dirname, 'Uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
 
 
 app.register(fastifyJwt, {
