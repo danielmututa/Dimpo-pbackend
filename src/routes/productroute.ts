@@ -7,6 +7,7 @@
 // import * as productController from '../controllers/products/controller';
 // import { productSchema } from '../models/products';
 // import { zodToJsonSchema } from '../utils/schemas';
+import fastify from 'fastify';
 
 // export default async (app: FastifyInstance) => {
 //   // Get all products
@@ -148,25 +149,25 @@ import * as productController from '../controllers/products/controller';
 import { productSchema } from '../models/products';
 import { zodToJsonSchema } from '../utils/schemas';
 
-export default async (app: FastifyInstance) => {
+export default async (fastify: FastifyInstance) => {
   // Get all products
-  app.get('/', productController.getProductsHandler);
+ fastify.get('/', productController.getProductsHandler);
 
   // Get single product by ID
-  app.get('/:id', productController.getProductHandler);
+  fastify.get('/:id', productController.getProductHandler);
 
   // Get all product images
-  app.get('/images', productController.getProductImagesHandler);
+  fastify.get('/images', productController.getProductImagesHandler);
 
   // Create new product
-  app.post('/newproduct', {
+  fastify.post('/newproduct', {
     handler: productController.createProductHandler,
     // Remove schema validation for body to allow multipart/form-data
     // Validation is handled manually in createProductHandler
   });
 
   // Update product
-  app.put('/:id', {
+  fastify.put('/:id', {
     handler: productController.updateProductHandler,
     schema: {
       body: zodToJsonSchema(productSchema.partial()),
@@ -174,10 +175,10 @@ export default async (app: FastifyInstance) => {
   });
 
   // Delete product
-  app.delete('/:id', productController.deleteProductHandler);
+  fastify.delete('/:id', productController.deleteProductHandler);
 
   // Cart routes
-  app.post('/:userId/cart', {
+  fastify.post('/:userId/cart', {
     handler: productController.addProductToCartHandler,
     schema: {
       body: {
@@ -191,9 +192,9 @@ export default async (app: FastifyInstance) => {
     },
   });
 
-  app.get('/:userId/cart', productController.getUserCartHandler);
+  fastify.get('/:userId/cart', productController.getUserCartHandler);
 
-  app.put('/:userId/cart/:cartItemId', {
+  fastify.put('/:userId/cart/:cartItemId', {
     handler: productController.updateCartItemQuantityHandler,
     schema: {
       body: {
@@ -206,5 +207,5 @@ export default async (app: FastifyInstance) => {
     },
   });
 
-  app.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
+  fastify.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
 };
