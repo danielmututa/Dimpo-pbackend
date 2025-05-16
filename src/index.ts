@@ -132,6 +132,7 @@ import { JwtUser } from './utils/jwt';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
+import fs from 'fs';
 
 // Load environment variables from .env file
 
@@ -161,6 +162,16 @@ app.register(fastifyStatic, {
   },
 });
 
+
+
+
+
+const uploadsDir = path.join(__dirname, 'Uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-very-secure-secret',
   cookie: {
@@ -184,9 +195,22 @@ app.register(blogRoutes, { prefix: '/api/blogs' });
 app.register(analytics, { prefix: '/api/analytics' });
 app.register(oderRoutes, { prefix: '/api/order' });
 
+// app.get('/health', async () => {
+//   return { status: 'ok' };
+// });
+
+
+
 app.get('/health', async () => {
   return { status: 'ok' };
 });
+
+app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+  return { message: 'Hello from Dimpo-pbackend!' };
+});
+
+
+
 
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
