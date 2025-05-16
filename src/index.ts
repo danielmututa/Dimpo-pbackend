@@ -132,6 +132,7 @@ import { JwtUser } from './utils/jwt';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
+import fs from 'fs';
 
 
 // Load environment variables from .env file
@@ -143,21 +144,53 @@ const app: FastifyInstance = fastify({
   logger: true,
 });
 
+// app.register(cors, {
+//   origin: 'http://localhost:5173',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
+
+
 app.register(cors, {
-  origin: 'http://localhost:5173',
+  origin: (origin, cb) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return cb(null, true);
+    // Allow all origins in production or specific ones in development
+    const allowedOrigins = [
+      'http://localhost:5173',
+      // Add your production frontend URL here
+    ];
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
+      return cb(null, true);
+    }
+    return cb(new Error('Not allowed by CORS'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
+
+
 app.register(multipart);
 
 // Serve image uploads
+// app.register(fastifyStatic, {
+//   root: path.join(__dirname, './Uploads'),
+//   prefix: '/Uploads/',
+//   setHeaders: (res) => {
+//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+//     res.setHeader('Access-Control-Allow-Methods', 'GET');
+//   },
+// });
+
 app.register(fastifyStatic, {
-  root: path.join(__dirname, './Uploads'),
+  root: path.join(__dirname, 'Uploads'),
   prefix: '/Uploads/',
   setHeaders: (res) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    // Allow all origins or configure based on environment
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
   },
 });
@@ -188,6 +221,28 @@ app.register(oderRoutes, { prefix: '/api/order' });
 app.get('/health', async () => {
   return { status: 'ok' };
 });
+
+
+app.get('/api/debug/env', async (request, reply) => {
+  return {
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT,
+    host: process.env.HOST,
+    databaseUrl: process.env.DATABASE_URL ? 'Set (value hidden)' : 'Not Set',
+    uploadsDir: path.join(__dirname, 'Uploads'),
+    uploadsExists: fs.existsSync(path.join(__dirname, 'Uploads')),
+  };
+});
+
+// app.get('/api/debug/db', async (request, reply) => {
+//   try {
+//     const result = await prisma.$queryRaw`SELECT 1 as connection_test`;
+//     return { dbConnection: 'Success', result };
+//   } catch (error) {
+//     reply.code(500);
+//     return { dbConnection: 'Failed', error.message };
+//   }
+// });
 
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
