@@ -195,6 +195,14 @@ app.register(fastifyStatic, {
   },
 });
 
+
+const uploadsDir = path.join(__dirname, 'Uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-very-secure-secret',
   cookie: {
@@ -223,16 +231,32 @@ app.get('/health', async () => {
 });
 
 
-app.get('/api/debug/env', async (request, reply) => {
-  return {
-    nodeEnv: process.env.NODE_ENV,
-    port: process.env.PORT,
-    host: process.env.HOST,
-    databaseUrl: process.env.DATABASE_URL ? 'Set (value hidden)' : 'Not Set',
-    uploadsDir: path.join(__dirname, 'Uploads'),
-    uploadsExists: fs.existsSync(path.join(__dirname, 'Uploads')),
-  };
-});
+// app.get('/api/debug/env', async (request, reply) => {
+//   return {
+//     nodeEnv: process.env.NODE_ENV,
+//     port: process.env.PORT,
+//     host: process.env.HOST,
+//     databaseUrl: process.env.DATABASE_URL ? 'Set (value hidden)' : 'Not Set',
+//     uploadsDir: path.join(__dirname, 'Uploads'),
+//     uploadsExists: fs.existsSync(path.join(__dirname, 'Uploads')),
+//   };
+// });
+
+
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/debug/env', async (request, reply) => {
+    return {
+      nodeEnv: process.env.NODE_ENV,
+      port: process.env.PORT,
+      host: process.env.HOST,
+      databaseUrl: process.env.DATABASE_URL ? 'Set (value hidden)' : 'Not Set',
+      uploadsDir: path.join(__dirname, 'Uploads'),
+      uploadsExists: fs.existsSync(path.join(__dirname, 'Uploads')),
+    };
+  });
+}
+
+
 
 // app.get('/api/debug/db', async (request, reply) => {
 //   try {
