@@ -193,10 +193,10 @@ model products {
 model reports {
   id             Int       @id @default(autoincrement())
   report_type    String?   @db.VarChar(50)
-  report_content Json?     // Changed to Json type for structured data
-  report_month   DateTime? // Add this field for monthly tracking
   report_date    DateTime? @default(now()) @db.Timestamp(6)
-  
+  report_month   DateTime?
+  report_content Json?
+
   @@schema("auth")
 }
 
