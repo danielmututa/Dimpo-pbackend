@@ -133,7 +133,6 @@ import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 
-
 // Load environment variables from .env file
 
 
@@ -162,12 +161,6 @@ app.register(fastifyStatic, {
   },
 });
 
-
-
-
-
-
-
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-very-secure-secret',
   cookie: {
@@ -191,22 +184,9 @@ app.register(blogRoutes, { prefix: '/api/blogs' });
 app.register(analytics, { prefix: '/api/analytics' });
 app.register(oderRoutes, { prefix: '/api/order' });
 
-// app.get('/health', async () => {
-//   return { status: 'ok' };
-// });
-
-
-
 app.get('/health', async () => {
   return { status: 'ok' };
 });
-
-app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  return { message: 'Hello from Dimpo-pbackend!' };
-});
-
-
-
 
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -248,72 +228,3 @@ declare module 'fastify' {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// {
-//   "name": "server",
-//   "version": "1.0.0",
-//   "main": "dist/index.js",
-//   "scripts": {
-//     "build": "tsc",
-//     "start": "node dist/index.js --omit=dev",
-//     "dev": "nodemon --watch \"src/**/*\" --ext ts,json --exec \"ts-node\" src/index.ts",
-//     "prisma:generate": "prisma generate",
-//     "prisma:migrate": "prisma migrate dev",
-//     "migrate": "npx prisma migrate deploy",
-//     "deploy": "npm run migrate && npm run start"
-//   },
-//   "dependencies": {
-//     "@fastify/autoload": "^6.2.0",
-//     "@fastify/compress": "^8.0.1",
-//     "@fastify/cors": "^11.0.1",
-//     "@fastify/helmet": "^13.0.1",
-//     "@fastify/jwt": "^9.1.0",
-//     "@fastify/multipart": "^9.0.3",
-//     "@fastify/rate-limit": "^10.2.2",
-//     "@fastify/static": "^8.1.1",
-//     "@fastify/swagger": "^9.4.2",
-//     "@fastify/type-provider-typebox": "^5.1.0",
-//     "@prisma/client": "^6.5.0",
-//     "@types/bcryptjs": "^2.4.6",
-//     "@types/uuid": "^10.0.0",
-//     "argon2": "^0.30.0",
-//     "bcryptjs": "^3.0.2",
-//     "dotenv": "^16.4.7",
-//     "fastify": "^5.3.3",
-//     "fastify-multipart": "^5.3.1",
-//     "jsonwebtoken": "^9.0.2",
-//     "nodemailer": "^6.10.0",
-//     "or": "^0.2.0",
-//     "pg": "^8.14.1",
-//     "rimraf": "^6.0.1",
-//     "ua-parser-js": "^2.0.3",
-//     "uuid": "^11.1.0",
-//     "zod": "^3.24.4",
-//     "zod-to-json-schema": "^3.24.5"
-//   },
-//   "devDependencies": {
-//     "@types/jsonwebtoken": "^9.0.9",
-//     "@types/node": "^22.15.17",
-//     "@types/pg": "^8.11.11",
-//     "nodemon": "^3.1.9",
-//     "prisma": "^6.5.0",
-//     "ts-node": "^10.9.2",
-//     "typescript": "^5.8.2"
-//   }
-// }
