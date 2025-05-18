@@ -87,6 +87,9 @@ export const getProductsHandler = async (request: FastifyRequest, reply: Fastify
   }
 };
 
+
+
+
 export const getProductImagesHandler = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -186,6 +189,9 @@ export const getProductHandler = async (
     reply.status(500).send({ message: 'Error fetching product' });
   }
 };
+
+
+
 
 export const updateProductHandler = async (
   request: FastifyRequest<{ Params: ProductParams; Body: Partial<ProductBody> }>,
