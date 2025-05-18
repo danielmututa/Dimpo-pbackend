@@ -161,6 +161,7 @@ app.register(cors, {
     // Allow all origins in production or specific ones in development
     const allowedOrigins = [
       'http://localhost:5173',
+            'https://dimbop-digital-marketing-dashboard.vercel.app',
       // Add your production frontend URL here
     ];
     if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
