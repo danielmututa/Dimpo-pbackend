@@ -164,7 +164,7 @@ app.register(cors, {
             'https://dimbop-digital-marketing-dashboard.vercel.app',
       // Add your production frontend URL here
     ];
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'one') {
       return cb(null, true);
     }
     return cb(new Error('Not allowed by CORS'), false);
