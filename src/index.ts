@@ -175,30 +175,63 @@ const app: FastifyInstance = fastify({
 // });
 
 
-app.register(cors, {
-  origin: (origin, cb) => {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'https://dimbop-digital-marketing-dashboard.vercel.app',
-    ];
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'http://localhost:5173',
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//     ];
 
-    if (!origin) {
-      // Allow non-browser requests (like Postman)
-      cb(null, true);
-      return;
-    }
+//     if (!origin) {
+//       // Allow non-browser requests (like Postman)
+//       cb(null, true);
+//       return;
+//     }
 
-    if (allowedOrigins.includes(origin)) {
-      cb(null, true);
-    } else {
-      console.error(`❌ CORS blocked for origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
+//     if (allowedOrigins.includes(origin)) {
+//       cb(null, true);
+//     } else {
+//       console.error(`❌ CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
+
+async function startServer() {
+  await app.register(cors, {
+    origin: (origin, cb) => {
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'https://dimbop-digital-marketing-dashboard.vercel.app',
+      ];
+
+      if (!origin) {
+        cb(null, true); // Allow Postman and CLI tools
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        console.error(`❌ CORS blocked for origin: ${origin}`);
+        cb(new Error('Not allowed by CORS'), false);
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  await app.register(authRoutes);
+  await app.register(productRoutes);
+  await app.register(blogRoutes);
+  await app.register(analytics);
+  await app.register(oderRoutes);
+  await app.listen(3000);
+}
 
 
 app.register(multipart);
