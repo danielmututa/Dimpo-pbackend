@@ -181,10 +181,19 @@ app.register(cors, {
       'http://localhost:5173',
       'https://dimbop-digital-marketing-dashboard.vercel.app',
     ];
-    if (!origin || allowedOrigins.includes(origin)) {
-      return cb(null, true);
+
+    if (!origin) {
+      // Allow non-browser requests (like Postman)
+      cb(null, true);
+      return;
     }
-    return cb(new Error('Not allowed by CORS'), false);
+
+    if (allowedOrigins.includes(origin)) {
+      cb(null, true);
+    } else {
+      console.error(`❌ CORS blocked for origin: ${origin}`);
+      cb(new Error('Not allowed by CORS'), false);
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
