@@ -158,31 +158,37 @@ const app: FastifyInstance = fastify({
 
 
 // Replace your current CORS configuration with this
-app.register(cors, {
-  origin: (origin, cb) => {
-    const allowedOrigins = [
-      'https://dimbop-digital-marketing-dashboard.vercel.app',
-      'http://localhost:5173',
-    ];
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//       'http://localhost:5173',
+//     ];
     
-    if (!origin) {
-      cb(null, true);
-      return;
-    }
+//     if (!origin) {
+//       cb(null, true);
+//       return;
+//     }
     
-    if (allowedOrigins.includes(origin)) {
-      // Return the actual requesting origin instead of just true
-      cb(null, origin);
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
+//     if (allowedOrigins.includes(origin)) {
+//       // Return the actual requesting origin instead of just true
+//       cb(null, origin);
+//     } else {
+//       console.error(`CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
 
+
+// Replace your current CORS configuration with this simplest version
+app.register(cors, { 
+  origin: true,  // Allow all origins temporarily to test
+  credentials: true 
+});
 
 
 app.get('/api/debug/cors', async (request, reply) => {
