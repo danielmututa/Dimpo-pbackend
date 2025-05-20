@@ -207,15 +207,15 @@ async function startServer() {
         'https://dimbop-digital-marketing-dashboard.vercel.app',
         'http://localhost:5173',
       ];
-
+      
       if (!origin) {
-        cb(null, true); 
+        cb(null, true);
         return;
       }
-
-
+      
       if (allowedOrigins.includes(origin)) {
-        cb(null, true);
+        // Return the actual requesting origin instead of just true
+        cb(null, origin);
       } else {
         console.error(` CORS blocked for origin: ${origin}`);
         cb(new Error('Not allowed by CORS'), false);
