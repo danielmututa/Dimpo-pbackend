@@ -135,7 +135,7 @@ import path from 'path';
 import fs from 'fs';
 
 
-
+// Load environment variables from .env file
 
 
 
@@ -146,19 +146,42 @@ const app: FastifyInstance = fastify({
   logger: true,
 });
 
+// app.register(cors, {
+//   origin: 'http://localhost:5173',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
+
+
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     // Allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return cb(null, true);
+//     // Allow all origins in production or specific ones in development
+//     const allowedOrigins = [
+//       'http://localhost:5173',
+//             'https://dimbop-digital-marketing-dashboard.vercel.app',
+//       // Add your production frontend URL here
+//     ];
+//     if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
+//       return cb(null, true);
+//     }
+//     return cb(new Error('Not allowed by CORS'), false);
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
 
 
 app.register(cors, {
   origin: (origin, cb) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return cb(null, true);
-    // Allow all origins in production or specific ones in development
     const allowedOrigins = [
       'http://localhost:5173',
       'https://dimbop-digital-marketing-dashboard.vercel.app',
-      // Add your production frontend URL here
     ];
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
+    if (!origin || allowedOrigins.includes(origin)) {
       return cb(null, true);
     }
     return cb(new Error('Not allowed by CORS'), false);
@@ -167,7 +190,6 @@ app.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 });
-
 
 
 app.register(multipart);
