@@ -154,85 +154,31 @@ const app: FastifyInstance = fastify({
 // });
 
 
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return cb(null, true);
-//     // Allow all origins in production or specific ones in development
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//             'https://dimbop-digital-marketing-dashboard.vercel.app',
-//       // Add your production frontend URL here
-//     ];
-//     if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
-//       return cb(null, true);
-//     }
-//     return cb(new Error('Not allowed by CORS'), false);
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// });
-
-
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//       'https://dimbop-digital-marketing-dashboard.vercel.app',
-//     ];
-
-//     if (!origin) {
-//       // Allow non-browser requests (like Postman)
-//       cb(null, true);
-//       return;
-//     }
-
-//     if (allowedOrigins.includes(origin)) {
-//       cb(null, true);
-//     } else {
-//       console.error(`❌ CORS blocked for origin: ${origin}`);
-//       cb(new Error('Not allowed by CORS'), false);
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// });
-
-async function startServer() {
-  await app.register(cors, {
-    origin: (origin, cb) => {
-      const allowedOrigins = [
-        'https://dimbop-digital-marketing-dashboard.vercel.app',
-        'http://localhost:5173',
-      ];
-      
-      if (!origin) {
-        cb(null, true);
-        return;
-      }
-      
-      if (allowedOrigins.includes(origin)) {
-        // Return the actual requesting origin instead of just true
-        cb(null, origin);
-      } else {
-        console.error(` CORS blocked for origin: ${origin}`);
-        cb(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
-
-  await app.register(authRoutes);
-  await app.register(productRoutes);
-  await app.register(blogRoutes);
-  await app.register(analytics);
-  await app.register(oderRoutes);
-  await app.listen(3000);
-}
+// Replace your current CORS configuration with this
+app.register(cors, {
+  origin: (origin, cb) => {
+    const allowedOrigins = [
+      'https://dimbop-digital-marketing-dashboard.vercel.app',
+      'http://localhost:5173',
+    ];
+    
+    if (!origin) {
+      cb(null, true);
+      return;
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      // Return the actual requesting origin instead of just true
+      cb(null, origin);
+    } else {
+      console.error(`CORS blocked for origin: ${origin}`);
+      cb(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+});
 
 
 app.register(multipart);
