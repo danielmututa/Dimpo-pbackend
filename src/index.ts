@@ -154,6 +154,9 @@ const app: FastifyInstance = fastify({
 // });
 
 
+
+
+
 // Replace your current CORS configuration with this
 app.register(cors, {
   origin: (origin, cb) => {
@@ -178,6 +181,24 @@ app.register(cors, {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+});
+
+
+
+app.get('/api/debug/cors', async (request, reply) => {
+  // Just for debugging
+  const requestOrigin = request.headers.origin;
+  return {
+    requestOrigin,
+    allowedOrigins: [
+      'https://dimbop-digital-marketing-dashboard.vercel.app',
+      'http://localhost:5173',
+    ],
+    wouldBeAllowed: [
+      'https://dimbop-digital-marketing-dashboard.vercel.app',
+      'http://localhost:5173',
+    ].includes(requestOrigin || '')
+  };
 });
 
 
