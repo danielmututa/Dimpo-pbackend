@@ -287,15 +287,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 
-// app.get('/api/debug/db', async (request, reply) => {
-//   try {
-//     const result = await prisma.$queryRaw`SELECT 1 as connection_test`;
-//     return { dbConnection: 'Success', result };
-//   } catch (error) {
-//     reply.code(500);
-//     return { dbConnection: 'Failed', error.message };
-//   }
-// });
 
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
