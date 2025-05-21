@@ -281,38 +281,45 @@ const app: FastifyInstance = fastify({
 //   optionsSuccessStatus: 204,
 // });
 
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'https://dimbop-digital-marketing-dashboard-k0l3ky04b.vercel.app',
+//       'https://dimbop-digital-dasboard.netlify.app',  // Check spelling here
+//       'http://localhost:5173',
+//     ];
+
+//     console.log(`Incoming request from origin: ${origin}`);
+//     console.log(`Allowed origins:`, allowedOrigins);
+
+//     if (!origin) {
+//       console.log('No origin provided, allowing request');
+//       cb(null, true);
+//       return;
+//     }
+
+//     if (allowedOrigins.includes(origin)) {
+//       console.log(`Origin ${origin} is allowed`);
+//       cb(null, origin);
+//     } else {
+//       console.error(`CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// });
+
+// Replace your entire CORS config with this temporary solution
 app.register(cors, {
-  origin: (origin, cb) => {
-    const allowedOrigins = [
-      'https://dimbop-digital-marketing-dashboard-k0l3ky04b.vercel.app',
-      'https://dimbop-digital-dasboard.netlify.app',  // Check spelling here
-      'http://localhost:5173',
-    ];
-
-    console.log(`Incoming request from origin: ${origin}`);
-    console.log(`Allowed origins:`, allowedOrigins);
-
-    if (!origin) {
-      console.log('No origin provided, allowing request');
-      cb(null, true);
-      return;
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      console.log(`Origin ${origin} is allowed`);
-      cb(null, origin);
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
-    }
-  },
+  origin: true, // This will accept ALL origins (less secure but works immediately)
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'Authorization']
 });
-
 
 
 app.register(multipart);
