@@ -448,7 +448,7 @@ app.get('/health', async () => {
 });
 
 // Debug env info in non-production only
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'one') {
   app.get('/api/debug/env', async () => {
     return {
       nodeEnv: process.env.NODE_ENV,
