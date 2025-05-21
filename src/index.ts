@@ -261,8 +261,8 @@ const app: FastifyInstance = fastify({
 app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
-      'https://dimbop-digital-marketing-dashboard.vercel.app',
-      'https://dimbop-digital-marketing-dashboard-9gx57vfgz.vercel.app',
+      'https://dimbop-digital-marketing-dash-git-9f930d-danielmututas-projects.vercel.app',
+      'dimbop-digital-marketing-dashboard-k0l3ky04b.vercel.app',
       'http://localhost:5173',
     ];
 
