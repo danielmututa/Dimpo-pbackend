@@ -164,6 +164,9 @@ app.register(cors, {
       'https://dimbop-digital-marketing-dashboard.vercel.app',
       'http://localhost:5173',
     ];
+
+
+    // f
     
     if (!origin) {
       cb(null, true);
