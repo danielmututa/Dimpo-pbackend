@@ -375,6 +375,7 @@ app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
       'https://dimbop-digital-marketing-dashboard.vercel.app',
+      'https://dimbop-digital-marketing-dashboard-9gx57vfgz.vercel.app',
       'http://localhost:5173',
     ];
 
