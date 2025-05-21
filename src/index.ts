@@ -262,7 +262,8 @@ app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
       'https://dimbop-digital-marketing-dash-git-9f930d-danielmututas-projects.vercel.app',
-      'dimbop-digital-marketing-dashboard-k0l3ky04b.vercel.app',
+      'https://dimbop-digital-marketing-dashboard-k0l3ky04b.vercel.app',
+      'https://dimbop-digital-dasboard.netlify.app',
       'http://localhost:5173',
     ];
 
