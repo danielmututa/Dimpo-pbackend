@@ -367,6 +367,12 @@ app.register(oderRoutes, { prefix: '/api/order' });
 
 // Health check endpoint  
 // ...............here
+app.get('/', async (request, reply) => {
+  return { message: 'API is running!' };
+});
+
+
+
 app.get('/health', async () => {
   return { status: 'ok' };
 });
