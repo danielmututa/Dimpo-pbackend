@@ -1,8 +1,4 @@
 "use strict";
-// import { FastifyInstance } from 'fastify';
-// import * as productController from '../controllers/products/controller';
-// import { productSchema } from '../models/products';
-// import { zodToJsonSchema } from '../utils/schemas';
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -40,30 +36,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const productController = __importStar(require("../controllers/products/controller"));
 const products_1 = require("../models/products");
 const schemas_1 = require("../utils/schemas");
-exports.default = async (app) => {
+exports.default = async (fastify) => {
     // Get all products
-    app.get('/', productController.getProductsHandler);
+    fastify.get('/', productController.getProductsHandler);
     // Get single product by ID
-    app.get('/:id', productController.getProductHandler);
+    fastify.get('/:id', productController.getProductHandler);
     // Get all product images
-    app.get('/images', productController.getProductImagesHandler);
+    fastify.get('/images', productController.getProductImagesHandler);
     // Create new product
-    app.post('/newproduct', {
+    fastify.post('/newproduct', {
         handler: productController.createProductHandler,
         // Remove schema validation for body to allow multipart/form-data
         // Validation is handled manually in createProductHandler
     });
     // Update product
-    app.put('/:id', {
+    fastify.put('/:id', {
         handler: productController.updateProductHandler,
         schema: {
             body: (0, schemas_1.zodToJsonSchema)(products_1.productSchema.partial()),
         },
     });
     // Delete product
-    app.delete('/:id', productController.deleteProductHandler);
+    fastify.delete('/:id', productController.deleteProductHandler);
     // Cart routes
-    app.post('/:userId/cart', {
+    fastify.post('/:userId/cart', {
         handler: productController.addProductToCartHandler,
         schema: {
             body: {
@@ -76,8 +72,8 @@ exports.default = async (app) => {
             },
         },
     });
-    app.get('/:userId/cart', productController.getUserCartHandler);
-    app.put('/:userId/cart/:cartItemId', {
+    fastify.get('/:userId/cart', productController.getUserCartHandler);
+    fastify.put('/:userId/cart/:cartItemId', {
         handler: productController.updateCartItemQuantityHandler,
         schema: {
             body: {
@@ -89,6 +85,6 @@ exports.default = async (app) => {
             },
         },
     });
-    app.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
+    fastify.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
 };
 //# sourceMappingURL=productroute.js.map

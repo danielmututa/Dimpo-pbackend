@@ -1,3 +1,3 @@
 import { FastifyInstance } from 'fastify';
-declare const _default: (app: FastifyInstance) => Promise<void>;
+declare const _default: (fastify: FastifyInstance) => Promise<void>;
 export default _default;
