@@ -39,7 +39,8 @@ app.register(cors, {
     }
 
     if (allowedOrigins.includes(origin)) {
-      cb(null, origin);
+      // cb(null, origin);
+      cb(null, true);
     } else {
       console.error(`CORS blocked for origin: ${origin}`);
       cb(new Error('Not allowed by CORS'), false);
