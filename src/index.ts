@@ -33,7 +33,7 @@ app.register(cors, {
     ];
 
     if (!origin) {
-      // Allow requests with no origin like curl or server-to-server
+     
       cb(null, true);
       return;
     }
