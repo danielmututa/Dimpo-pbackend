@@ -25,11 +25,11 @@ const app: FastifyInstance = fastify({
 app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
       'https://dimbop-digital-dasboard.netlify.app',
       'https://dimbop-users-site.vercel.app',
       'https://dimbop-digital-marketing-dashboard.vercel.app',
-      'http://localhost:5173',
-       'http://localhost:3000'
     ];
 
     if (!origin) {
