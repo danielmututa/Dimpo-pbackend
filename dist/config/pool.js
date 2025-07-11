@@ -16,7 +16,7 @@ dotenv_1.default.config();
 const pool = new pg_1.Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false, // Important for Railway managed Postgres
+        rejectUnauthorized: false,
     },
 });
 exports.default = pool;
