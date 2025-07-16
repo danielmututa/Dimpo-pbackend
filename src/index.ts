@@ -97,10 +97,30 @@ const app: FastifyInstance = fastify({
 //   allowedHeaders: ['Content-Type', 'Authorization'],
 // });
 
-app.register(cors, {
-  origin: true,  // Allow all origins
+import cors from '@fastify/cors';
+
+await app.register(cors, {
+  origin: (origin, cb) => {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://dimbop-digital-dasboard.netlify.app',
+      'https://dimbop-users-site.vercel.app',
+      'https://dimbop-digital-marketing-dashboard.vercel.app',
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      cb(null, true); // Allow request
+    } else {
+      console.error(`Blocked by CORS: ${origin}`);
+      cb(new Error('Not allowed by CORS'), false); // Block request
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 });
+
 
 app.register(multipart);
 
