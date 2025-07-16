@@ -84,19 +84,23 @@ const app: FastifyInstance = fastify({
 // });
 
 
-app.register(cors, {
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://dimbop-digital-dasboard.netlify.app',
-    'https://dimbop-users-site.vercel.app',
-    'https://dimbop-digital-marketing-dashboard.vercel.app',
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
+// app.register(cors, {
+//   origin: [
+//     'http://localhost:5173',
+//     'http://localhost:3000',
+//     'https://dimbop-digital-dasboard.netlify.app',
+//     'https://dimbop-users-site.vercel.app',
+//     'https://dimbop-digital-marketing-dashboard.vercel.app',
+//   ],
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// });
 
+app.register(cors, {
+  origin: true,  // Allow all origins
+  credentials: true,
+});
 
 app.register(multipart);
 
