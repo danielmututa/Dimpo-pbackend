@@ -54,52 +54,7 @@ const app: FastifyInstance = fastify({
 // });
 
 
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//       'http://localhost:3000',
-//       'https://dimbop-digital-dasboard.netlify.app',
-//       'https://dimbop-users-site.vercel.app',
-//       'https://dimbop-digital-marketing-dashboard.vercel.app',
-//     ];
-
-//     if (!origin) {
-//       cb(null, true);
-//       return;
-//     }
-
-//     if (allowedOrigins.includes(origin)) {
-//       cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
-//     } else {
-//       console.error(`CORS blocked for origin: ${origin}`);
-//       cb(new Error('Not allowed by CORS'), false);
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   preflightContinue: false,
-//   optionsSuccessStatus: 204,
-// });
-
-
-// app.register(cors, {
-//   origin: [
-//     'http://localhost:5173',
-//     'http://localhost:3000',
-//     'https://dimbop-digital-dasboard.netlify.app',
-//     'https://dimbop-users-site.vercel.app',
-//     'https://dimbop-digital-marketing-dashboard.vercel.app',
-//   ],
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// });
-
-import cors from '@fastify/cors';
-
-await app.register(cors, {
+app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
       'http://localhost:5173',
@@ -109,17 +64,26 @@ await app.register(cors, {
       'https://dimbop-digital-marketing-dashboard.vercel.app',
     ];
 
-    if (!origin || allowedOrigins.includes(origin)) {
-      cb(null, true); // Allow request
+    if (!origin) {
+      cb(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
     } else {
-      console.error(`Blocked by CORS: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false); // Block request
+      console.error(`CORS blocked for origin: ${origin}`);
+      cb(new Error('Not allowed by CORS'), false);
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 });
+
+
 
 
 app.register(multipart);
