@@ -54,36 +54,73 @@ const app: FastifyInstance = fastify({
 // });
 
 
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'http://localhost:5173',
+//       'http://localhost:3000',
+//       'https://dimbop-digital-dasboard.netlify.app',
+//       'https://dimbop-users-site.vercel.app',
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//     ];
+
+//     if (!origin) {
+//       cb(null, true);
+//       return;
+//     }
+
+//     if (allowedOrigins.includes(origin)) {
+//       cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
+//     } else {
+//       console.error(`CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// });
+
+
+// UPDATED CORS CONFIGURATION - This is the key fix
 app.register(cors, {
-  origin: (origin, cb) => {
+  origin: (origin, callback) => {
     const allowedOrigins = [
-      'http://localhost:5173',
       'http://localhost:3000',
+      'http://localhost:5173',
       'https://dimbop-digital-dasboard.netlify.app',
       'https://dimbop-users-site.vercel.app',
       'https://dimbop-digital-marketing-dashboard.vercel.app',
     ];
 
+    // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) {
-      cb(null, true);
-      return;
+      return callback(null, true);
     }
 
+    // Check if the origin is in the allowed list
     if (allowedOrigins.includes(origin)) {
-      cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
+      return callback(null, true);
     }
+
+    // Block other origins
+    console.error(`CORS blocked for origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
   preflightContinue: false,
   optionsSuccessStatus: 204,
 });
 
-
+// ADD EXPLICIT OPTIONS HANDLER
+app.options('*', async (request, reply) => {
+  return reply.code(204).send();
+});
 
 
 app.register(multipart);
