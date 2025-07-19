@@ -83,35 +83,40 @@ const app: FastifyInstance = fastify({
 //   optionsSuccessStatus: 204,
 // });
 
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'http://localhost:5173',
+//       'http://localhost:3000',
+//       'https://dimbop-digital-dasboard.netlify.app',
+//       'https://dimbop-users-site.vercel.app',
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//     ];
+
+//     if (!origin) {
+//       // No origin (curl or server-to-server), allow
+//       cb(null, true);
+//       return;
+//     }
+
+//     if (allowedOrigins.includes(origin)) {
+//       // Here you MUST pass the origin string (not true)
+//       cb(null, origin);  // <-- pass origin, NOT true
+//     } else {
+//       console.error(`CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// });
+
 app.register(cors, {
-  origin: (origin, cb) => {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://dimbop-digital-dasboard.netlify.app',
-      'https://dimbop-users-site.vercel.app',
-      'https://dimbop-digital-marketing-dashboard.vercel.app',
-    ];
-
-    if (!origin) {
-      // No origin (curl or server-to-server), allow
-      cb(null, true);
-      return;
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      // Here you MUST pass the origin string (not true)
-      cb(null, origin);  // <-- pass origin, NOT true
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
+  origin: true, // Allow all origins temporarily for testing
+  credentials: true
 });
 
 // UPDATED CORS CONFIGURATION - This is the key fix
