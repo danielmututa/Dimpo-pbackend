@@ -100,8 +100,11 @@ app.register(cors, {
       return callback(null, true);
     }
 
-    // Check if the origin is in the allowed list
-    if (allowedOrigins.includes(origin)) {
+    // Normalize origin by removing trailing slash if present
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+
+    // Check if the normalized origin is in the allowed list
+    if (allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 
@@ -116,6 +119,7 @@ app.register(cors, {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 });
+
 
 // ADD EXPLICIT OPTIONS HANDLER
 app.options('*', async (request, reply) => {
