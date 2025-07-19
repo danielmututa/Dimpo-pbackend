@@ -54,6 +54,35 @@ const app: FastifyInstance = fastify({
 // });
 
 
+// app.register(cors, {
+//   origin: (origin, cb) => {
+//     const allowedOrigins = [
+//       'http://localhost:5173',
+//       'http://localhost:3000',
+//       'https://dimbop-digital-dasboard.netlify.app',
+//       'https://dimbop-users-site.vercel.app',
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//     ];
+
+//     if (!origin) {
+//       cb(null, true);
+//       return;
+//     }
+
+//     if (allowedOrigins.includes(origin)) {
+//       cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
+//     } else {
+//       console.error(`CORS blocked for origin: ${origin}`);
+//       cb(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// });
+
 app.register(cors, {
   origin: (origin, cb) => {
     const allowedOrigins = [
@@ -65,12 +94,14 @@ app.register(cors, {
     ];
 
     if (!origin) {
+      // No origin (curl or server-to-server), allow
       cb(null, true);
       return;
     }
 
     if (allowedOrigins.includes(origin)) {
-      cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
+      // Here you MUST pass the origin string (not true)
+      cb(null, origin);  // <-- pass origin, NOT true
     } else {
       console.error(`CORS blocked for origin: ${origin}`);
       cb(new Error('Not allowed by CORS'), false);
@@ -82,7 +113,6 @@ app.register(cors, {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 });
-
 
 // UPDATED CORS CONFIGURATION - This is the key fix
 // app.register(cors, {
