@@ -165,9 +165,9 @@ app.register(cors, {
 
 
 // ADD EXPLICIT OPTIONS HANDLER
-app.options('*', async (request, reply) => {
-  return reply.code(204).send();
-});
+// app.options('*', async (request, reply) => {
+//   return reply.code(204).send();
+// });
 
 
 app.register(multipart);
