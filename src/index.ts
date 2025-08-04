@@ -50,7 +50,8 @@ app.register(cors, {
 
     // Block other origins
     console.log(`CORS blocked for origin: ${origin}`);
-    return callback(new Error('Not allowed by CORS'), false); // This was causing the 500 error
+    // return callback(new Error('Not allowed by CORS'), false);
+    return callback(null, false); // This was causing the 500 error
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
