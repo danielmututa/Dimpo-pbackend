@@ -233,3 +233,5 @@ declare module 'fastify' {
 // $env:Path += ";C:\Program Files\PostgreSQL\17\bin"
 // pg_dump -U postgres -d inventortest > inventortest_dump.sql 
 // Get-Content inventortest_dump.sql | psql "postgresql://postgres:CEJtqVqKtvmApKPMuKAsCbrwXHoNuRtz@caboose.proxy.rlwy.net:29455/railway"
+
+
