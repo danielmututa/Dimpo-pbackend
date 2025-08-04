@@ -23,45 +23,71 @@ const app: FastifyInstance = fastify({
 
 
 // FIXED CORS Configuration
+// app.register(cors, {
+//   origin: (origin, callback) => {
+//     const allowedOrigins = [
+//       'http://localhost:3000',
+//       'http://localhost:5173',
+//       'https://dimbop-digital-dasboard.netlify.app',
+//       'https://dimbop-users-site.vercel.app',
+//       'https://dimbop-digital-marketing-dashboard.vercel.app',
+//     ];
+
+//     // IMPORTANT: Allow requests with no origin (this was the issue!)
+//     if (!origin) {
+//       console.log('Request with no origin - allowing');
+//       return callback(null, true);
+//     }
+
+//     // Normalize origin by removing trailing slash if present
+//     const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+
+//     // Check if the normalized origin is in the allowed list
+//     if (allowedOrigins.includes(normalizedOrigin)) {
+//       console.log(`Allowed origin: ${normalizedOrigin}`);
+//       return callback(null, true);
+//     }
+
+//     // Block other origins
+//     console.log(`CORS blocked for origin: ${origin}`);
+//     // return callback(new Error('Not allowed by CORS'), false);
+//     return callback(null, false); // This was causing the 500 error
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+//   exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// });
+
+// Simplified and optimized CORS configuration
 app.register(cors, {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://dimbop-digital-dasboard.netlify.app',
-      'https://dimbop-users-site.vercel.app',
-      'https://dimbop-digital-marketing-dashboard.vercel.app',
-    ];
-
-    // IMPORTANT: Allow requests with no origin (this was the issue!)
-    if (!origin) {
-      console.log('Request with no origin - allowing');
-      return callback(null, true);
-    }
-
-    // Normalize origin by removing trailing slash if present
-    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
-
-    // Check if the normalized origin is in the allowed list
-    if (allowedOrigins.includes(normalizedOrigin)) {
-      console.log(`Allowed origin: ${normalizedOrigin}`);
-      return callback(null, true);
-    }
-
-    // Block other origins
-    console.log(`CORS blocked for origin: ${origin}`);
-    // return callback(new Error('Not allowed by CORS'), false);
-    return callback(null, false); // This was causing the 500 error
-  },
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://dimbop-digital-dasboard.netlify.app',
+    'https://dimbop-users-site.vercel.app',
+    'https://dimbop-digital-marketing-dashboard.vercel.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Length'],
   preflightContinue: false,
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 204
 });
 
-
+// Add explicit OPTIONS handler for all routes
+app.addHook('onRequest', async (request, reply) => {
+  if (request.method === 'OPTIONS') {
+    reply.header('Access-Control-Allow-Origin', request.headers.origin || '*')
+       .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+       .header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+       .header('Access-Control-Allow-Credentials', 'true')
+       .send();
+  }
+});
 
 
 // app.register(cors, {
