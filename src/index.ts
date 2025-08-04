@@ -62,6 +62,8 @@ const app: FastifyInstance = fastify({
 // });
 
 // Simplified and optimized CORS configuration
+
+
 app.register(cors, {
   origin: [
     'http://localhost:3000',
@@ -74,11 +76,10 @@ app.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Length'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  strictPreflight: true
 });
 
-// Add explicit OPTIONS handler for all routes
+// 2. Add explicit OPTIONS handler for all routes
 app.addHook('onRequest', async (request, reply) => {
   if (request.method === 'OPTIONS') {
     reply.header('Access-Control-Allow-Origin', request.headers.origin || '*')
@@ -86,6 +87,7 @@ app.addHook('onRequest', async (request, reply) => {
        .header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
        .header('Access-Control-Allow-Credentials', 'true')
        .send();
+    return reply; // End the request chain here
   }
 });
 
