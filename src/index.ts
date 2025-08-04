@@ -21,110 +21,57 @@ const app: FastifyInstance = fastify({
   logger: true,
 });
 
-// CORS config with whitelist and preflight support
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//       'http://localhost:3000',
-//       'https://dimbop-digital-dasboard.netlify.app',
-//       'https://dimbop-users-site.vercel.app',
-//       'https://dimbop-digital-marketing-dashboard.vercel.app',
-//     ];
 
-//     if (!origin) {
-     
-//       cb(null, true);
-//       return;
-//     }
-
-//     if (allowedOrigins.includes(origin)) {
-//       cb(null, origin);
-//       // cb(null, true);
-//     } else {
-//       console.error(`CORS blocked for origin: ${origin}`);
-//       cb(new Error('Not allowed by CORS'), false);
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   preflightContinue: false,
-//   optionsSuccessStatus: 204,
-// });
-
-
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//       'http://localhost:3000',
-//       'https://dimbop-digital-dasboard.netlify.app',
-//       'https://dimbop-users-site.vercel.app',
-//       'https://dimbop-digital-marketing-dashboard.vercel.app',
-//     ];
-
-//     if (!origin) {
-//       cb(null, true);
-//       return;
-//     }
-
-//     if (allowedOrigins.includes(origin)) {
-//       cb(null, true);  // ← Changed from cb(null, origin) to cb(null, true)
-//     } else {
-//       console.error(`CORS blocked for origin: ${origin}`);
-//       cb(new Error('Not allowed by CORS'), false);
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   preflightContinue: false,
-//   optionsSuccessStatus: 204,
-// });
-
-// app.register(cors, {
-//   origin: (origin, cb) => {
-//     const allowedOrigins = [
-//       'http://localhost:5173',
-//       'http://localhost:3000',
-//       'https://dimbop-digital-dasboard.netlify.app',
-//       'https://dimbop-users-site.vercel.app',
-//       'https://dimbop-digital-marketing-dashboard.vercel.app',
-//     ];
-
-//     if (!origin) {
-//       // No origin (curl or server-to-server), allow
-//       cb(null, true);
-//       return;
-//     }
-
-//     if (allowedOrigins.includes(origin)) {
-//       // Here you MUST pass the origin string (not true)
-//       cb(null, origin);  // <-- pass origin, NOT true
-//     } else {
-//       console.error(`CORS blocked for origin: ${origin}`);
-//       cb(new Error('Not allowed by CORS'), false);
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   preflightContinue: false,
-//   optionsSuccessStatus: 204,
-// });
-
+// FIXED CORS Configuration
 app.register(cors, {
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://dimbop-digital-dasboard.netlify.app',
-    'https://dimbop-users-site.vercel.app',
-    'https://dimbop-digital-marketing-dashboard.vercel.app'
-  ],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://dimbop-digital-dasboard.netlify.app',
+      'https://dimbop-users-site.vercel.app',
+      'https://dimbop-digital-marketing-dashboard.vercel.app',
+    ];
+
+    // IMPORTANT: Allow requests with no origin (this was the issue!)
+    if (!origin) {
+      console.log('Request with no origin - allowing');
+      return callback(null, true);
+    }
+
+    // Normalize origin by removing trailing slash if present
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+
+    // Check if the normalized origin is in the allowed list
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      console.log(`Allowed origin: ${normalizedOrigin}`);
+      return callback(null, true);
+    }
+
+    // Block other origins
+    console.log(`CORS blocked for origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'), false); // This was causing the 500 error
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 });
+
+
+// app.register(cors, {
+//   origin: [
+//     'http://localhost:5173',
+//     'http://localhost:3000',
+//     'https://dimbop-digital-dasboard.netlify.app',
+//     'https://dimbop-users-site.vercel.app',
+//     'https://dimbop-digital-marketing-dashboard.vercel.app'
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   credentials: true
+// });
 
 
 // UPDATED CORS CONFIGURATION - This is the key fix
