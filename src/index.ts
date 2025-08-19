@@ -216,3 +216,5 @@ declare module 'fastify' {
 // Get-Content inventortest_dump.sql | psql "postgresql://postgres:CEJtqVqKtvmApKPMuKAsCbrwXHoNuRtz@caboose.proxy.rlwy.net:29455/railway"
 
 
+// https://platform.openai.com/docs/overview
+// https://platform.openai.com/api-keys

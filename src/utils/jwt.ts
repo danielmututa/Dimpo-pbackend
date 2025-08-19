@@ -32,4 +32,8 @@ export const verifyToken = (token: string): JwtUser => {
 
 
 
+// FzaYveYQlxmiCEtU
 
+// mongodb+srv://mututadaniel54:FzaYveYQlxmiCEtU@cluster0.j1hrmmg.mongodb.net/
+
+// mongodb+srv://mututadaniel54:<db_password>@cluster0.j1hrmmg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
