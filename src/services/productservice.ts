@@ -248,135 +248,10 @@ export const createProduct = async (
 
 
 
+
+
 // export const addProductToCart = async (
-//     userId: number,
-//     productId: number,
-//     quantity: number,
-//     data: Partial<z.infer<typeof productSchema>> = {} // Optional product data
-//   ) => {
-//     const validatedData = productSchema.partial().parse(data);
-    
-//     if (!validatedData) throw new Error('Product not found');
-    
-//     // Handle undefined/null stock quantity
-//     const stockQuantity = validatedData.stock_quantity ?? 0;
-//     if (stockQuantity < quantity) {
-//       throw new Error('Insufficient stock');
-//     }
-  
-//     // Update product's stock quantity
-//     await prisma.products.update({
-//       where: { id: productId },
-//       data: {
-//         stock_quantity: {
-//           decrement: quantity
-//         },
-//         updated_at: new Date()
-//       }
-//     });
-  
-//     const existingCartItem = await prisma.cart.findFirst({
-//       where: {
-//         product_id: productId,
-//         user_id: userId
-//       }
-//     });
-  
-//     // Handle Decimal type for price calculations
-//     const productPrice = new Prisma.Decimal(validatedData.price ?? 0);
-  
-//     if (existingCartItem) {
-//       const newQuantity = existingCartItem.quantity + quantity;
-//       return await prisma.cart.update({
-//         where: { id: existingCartItem.id },
-//         data: {
-//           quantity: newQuantity,
-//           price: productPrice.mul(newQuantity),
-//           updated_at: new Date()
-//         },
-//         include: {
-//           products: true
-//         }
-//       });
-//     }
-  
-//     return await prisma.cart.create({
-//       data: {
-//         user_id: userId,
-//         product_id: productId,
-//         quantity,
-//         price: productPrice.mul(quantity),
-//         created_at: new Date(),
-//         updated_at: new Date()
-//       },
-//       include: {
-//         products: true
-//       }
-//     });
-//   };
-
-
- 
-
-
-  // export const updateCartItemQuantity = async (
-  //   cartItemId: number,
-  //   userId: number,
-  //   newQuantity: number,
-  //   data?: Partial<z.infer<typeof productSchema>> // Optional product data
-  // ) => {
-  //   if (newQuantity <= 0) {
-  //     return await deleteCartItem(cartItemId, userId);
-  //   }
-  
-  //   const cartItem = await prisma.cart.findFirst({
-  //     where: {
-  //       id: cartItemId,
-  //       user_id: userId
-  //     },
-  //     include: {
-  //       products: {
-  //         select: {
-  //           id: true,
-  //           price: true,
-  //           stock_quantity: true
-  //         }
-  //       }
-  //     }
-  //   });
-  
-  //   if (!cartItem || !cartItem.products) {
-  //     throw new Error('Cart item not found');
-  //   }
-  
-  //   // Validate stock if product data is provided
-  //   if (data) {
-  //     const validatedData = productSchema.partial().parse(data);
-  //     const stockQuantity = validatedData.stock_quantity ?? 0;
-  //     if (stockQuantity < newQuantity) {
-  //       throw new Error('Insufficient stock');
-  //     }
-  //   }
-  
-  //   // Handle Decimal type for price calculations
-  //   const productPrice = new Prisma.Decimal(cartItem.products.price);
-  
-  //   return await prisma.cart.update({
-  //     where: { id: cartItemId },
-  //     data: {
-  //       quantity: newQuantity,
-  //       price: productPrice.mul(newQuantity),
-  //       updated_at: new Date()
-  //     },
-  //     include: {
-  //       products: true
-  //     }
-  //   });
-  // };
-
-
-//   export const addProductToCart = async (
-//   userId: number,
+//   userId: number, // ✅ must be the buyer's ID
 //   productId: number,
 //   quantity: number
 // ) => {
@@ -399,11 +274,11 @@ export const createProduct = async (
 //     }
 //   });
 
-//   // Check if item already in cart
+//   // Check if item already in cart for this user
 //   const existingCartItem = await prisma.cart.findFirst({
 //     where: {
 //       product_id: productId,
-//       user_id: userId
+//       user_id: userId // ✅ buyer ID
 //     }
 //   });
 
@@ -422,10 +297,10 @@ export const createProduct = async (
 //     });
 //   }
 
-//   // Create new cart item
+//   // Create new cart item for buyer
 //   return await prisma.cart.create({
 //     data: {
-//       user_id: userId,
+//       user_id: userId, // ✅ buyer ID
 //       product_id: productId,
 //       quantity,
 //       price: productPrice.mul(quantity),
@@ -436,10 +311,8 @@ export const createProduct = async (
 //   });
 // };
 
-
-
 export const addProductToCart = async (
-  userId: number, // ✅ must be the buyer's ID
+  userId: number,
   productId: number,
   quantity: number
 ) => {
@@ -449,31 +322,29 @@ export const addProductToCart = async (
 
   if (!product) throw new Error('Product not found');
 
-  if ((product.stock_quantity ?? 0) < quantity) {
-    throw new Error('Insufficient stock');
-  }
-
-  // Update product's stock
-  await prisma.products.update({
-    where: { id: productId },
-    data: {
-      stock_quantity: { decrement: quantity },
-      updated_at: new Date()
-    }
-  });
-
   // Check if item already in cart for this user
   const existingCartItem = await prisma.cart.findFirst({
-    where: {
-      product_id: productId,
-      user_id: userId // ✅ buyer ID
-    }
+    where: { product_id: productId, user_id: userId }
   });
 
   const productPrice = new Prisma.Decimal(product.price);
 
   if (existingCartItem) {
     const newQuantity = existingCartItem.quantity + quantity;
+
+    if ((product.stock_quantity ?? 0) < quantity) {
+      throw new Error('Insufficient stock');
+    }
+
+    // Update product stock
+    await prisma.products.update({
+      where: { id: productId },
+      data: {
+        stock_quantity: { decrement: quantity },
+        updated_at: new Date()
+      }
+    });
+
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
@@ -485,10 +356,22 @@ export const addProductToCart = async (
     });
   }
 
-  // Create new cart item for buyer
+  // New item in cart
+  if ((product.stock_quantity ?? 0) < quantity) {
+    throw new Error('Insufficient stock');
+  }
+
+  await prisma.products.update({
+    where: { id: productId },
+    data: {
+      stock_quantity: { decrement: quantity },
+      updated_at: new Date()
+    }
+  });
+
   return await prisma.cart.create({
     data: {
-      user_id: userId, // ✅ buyer ID
+      user_id: userId,
       product_id: productId,
       quantity,
       price: productPrice.mul(quantity),
@@ -498,7 +381,6 @@ export const addProductToCart = async (
     include: { products: true }
   });
 };
-
 
 
 
