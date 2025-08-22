@@ -181,11 +181,18 @@ export default async (fastify: FastifyInstance) => {
   fastify.post('/:userId/cart', {
     handler: productController.addProductToCartHandler,
     schema: {
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' },
+        },
+        required: ['userId'],
+      },
       body: {
         type: 'object',
         properties: {
-          productId: { type: 'number' },
-          quantity: { type: 'number', minimum: 1 },
+          productId: { type: ['number', 'string'] }, // Allow both number and string
+          quantity: { type: ['number', 'string'], minimum: 1 },
         },
         required: ['productId', 'quantity'],
       },
