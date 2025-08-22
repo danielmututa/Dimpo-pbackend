@@ -330,13 +330,14 @@ export const addProductToCart = async (
   const productPrice = new Prisma.Decimal(product.price);
 
   if (existingCartItem) {
-    const newQuantity = existingCartItem.quantity + quantity;
-
-    if ((product.stock_quantity ?? 0) < quantity) {
+    const newTotalQuantity = existingCartItem.quantity + quantity;
+    
+    // ✅ CORRECT: Check if we have enough stock for the new total quantity
+    if ((product.stock_quantity ?? 0) < newTotalQuantity) {
       throw new Error('Insufficient stock');
     }
 
-    // Update product stock
+    // Update product stock - only decrement the quantity being added
     await prisma.products.update({
       where: { id: productId },
       data: {
@@ -348,8 +349,8 @@ export const addProductToCart = async (
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
-        quantity: newQuantity,
-        price: productPrice.mul(newQuantity),
+        quantity: newTotalQuantity,
+        price: productPrice.mul(newTotalQuantity),
         updated_at: new Date()
       },
       include: { products: true }
@@ -357,6 +358,7 @@ export const addProductToCart = async (
   }
 
   // New item in cart
+  // ✅ CORRECT: Check if we have enough stock for the quantity requested
   if ((product.stock_quantity ?? 0) < quantity) {
     throw new Error('Insufficient stock');
   }
