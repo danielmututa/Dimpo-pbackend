@@ -314,6 +314,83 @@ export const createProduct = async (
 
 
 
+// export const addProductToCart = async (userId: number, productId: number, quantity: number) => {
+//   const product = await prisma.products.findUnique({
+//     where: { id: productId }
+//   });
+
+//   if (!product) {
+//     throw new Error('Product not found');
+//   }
+
+//   const existingCartItem = await prisma.cart.findFirst({
+//     where: {
+//        product_id: productId,
+//        user_id: userId 
+//     }
+//   });
+
+
+// // 🔥 FIX: Use product.stock_quantity instead of currentStock
+//   console.log(`=== DEBUG INFO ===`);
+//   console.log(`Product ID: ${productId}`);
+//   console.log(`Current stock_quantity in DB: ${product.stock_quantity}`);
+//   console.log(`Requested quantity: ${quantity}`);
+//   console.log(`Existing cart item:`, existingCartItem);
+//   if (existingCartItem) {
+//     console.log(`Current cart quantity: ${existingCartItem.quantity}`);
+//     console.log(`New total would be: ${existingCartItem.quantity + quantity}`);
+//   }
+//   console.log(`=== END DEBUG ===`);
+
+//   const productPrice = new Prisma.Decimal(product.price);
+//   const currentStock = product.stock_quantity ?? 0; // ✅ Define currentStock AFTER the debug logs
+
+  
+  
+
+//   // const productPrice = new Prisma.Decimal(product.price);
+//   const originalStock = product.stock_quantity ?? 0;
+
+//   if (existingCartItem) {
+//     const newTotalQuantity = existingCartItem.quantity + quantity;
+    
+//     // ✅ Check against ORIGINAL stock, not decremented stock
+//     if (newTotalQuantity > originalStock) {
+//       throw new Error(`Insufficient stock. Only ${originalStock} items available total.`);
+//     }
+
+//     // ✅ Update cart item (don't touch product stock until checkout)
+//     return await prisma.cart.update({
+//       where: { id: existingCartItem.id },
+//       data: {
+//         quantity: newTotalQuantity,
+//         price: productPrice.mul(newTotalQuantity),
+//         updated_at: new Date()
+//       },
+//       include: { products: true }
+//     });
+//   } else {
+//     if (quantity > originalStock) {
+//       throw new Error(`Insufficient stock. Only ${originalStock} items available.`);
+//     }
+
+//     // ✅ Create cart item (don't touch product stock until checkout)
+//     return await prisma.cart.create({
+//       data: {
+//         user_id: userId,
+//         product_id: productId,
+//         quantity,
+//         price: productPrice.mul(quantity),
+//         created_at: new Date(),
+//         updated_at: new Date()
+//       },
+//       include: { products: true }
+//     });
+//   }
+// };
+
+
 export const addProductToCart = async (userId: number, productId: number, quantity: number) => {
   const product = await prisma.products.findUnique({
     where: { id: productId }
@@ -334,14 +411,9 @@ export const addProductToCart = async (userId: number, productId: number, quanti
   const originalStock = product.stock_quantity ?? 0;
 
   if (existingCartItem) {
+    // Update existing cart item - don't check stock, just update quantity
     const newTotalQuantity = existingCartItem.quantity + quantity;
     
-    // ✅ Check against ORIGINAL stock, not decremented stock
-    if (newTotalQuantity > originalStock) {
-      throw new Error(`Insufficient stock. Only ${originalStock} items available total.`);
-    }
-
-    // ✅ Update cart item (don't touch product stock until checkout)
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
@@ -352,11 +424,7 @@ export const addProductToCart = async (userId: number, productId: number, quanti
       include: { products: true }
     });
   } else {
-    if (quantity > originalStock) {
-      throw new Error(`Insufficient stock. Only ${originalStock} items available.`);
-    }
-
-    // ✅ Create cart item (don't touch product stock until checkout)
+    // Create new cart item - don't check stock for now
     return await prisma.cart.create({
       data: {
         user_id: userId,
