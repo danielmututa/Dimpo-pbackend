@@ -178,41 +178,36 @@ export default async (fastify: FastifyInstance) => {
   fastify.delete('/:id', productController.deleteProductHandler);
 
   // Cart routes
-  fastify.post('/:userId/cart', {
-    handler: productController.addProductToCartHandler,
-    schema: {
-      params: {
-        type: 'object',
-        properties: {
-          userId: { type: 'string' },
-        },
-        required: ['userId'],
+  fastify.post('/cart', {
+  handler: productController.addProductToCartHandler,
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        productId: { type: ['number', 'string'] }, // Allow both number and string
+        quantity: { type: ['number', 'string'], minimum: 1 },
       },
-      body: {
-        type: 'object',
-        properties: {
-          productId: { type: ['number', 'string'] }, // Allow both number and string
-          quantity: { type: ['number', 'string'], minimum: 1 },
-        },
-        required: ['productId', 'quantity'],
-      },
+      required: ['productId', 'quantity'],
     },
-  });
+  },
+});
 
-  fastify.get('/:userId/cart', productController.getUserCartHandler);
+  // Get user's cart (userId comes from session/auth)
+fastify.get('/cart', productController.getUserCartHandler);
 
-  fastify.put('/:userId/cart/:cartItemId', {
-    handler: productController.updateCartItemQuantityHandler,
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          quantity: { type: 'number', minimum: 1 },
-        },
-        required: ['quantity'],
+// Update cart item quantity (userId from session/auth)
+fastify.put('/cart/:cartItemId', {
+  handler: productController.updateCartItemQuantityHandler,
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        quantity: { type: 'number', minimum: 1 },
       },
+      required: ['quantity'],
     },
-  });
+  },
+});
 
-  fastify.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
+fastify.delete('/cart/:cartItemId', productController.deleteCartItemHandler);
 };
