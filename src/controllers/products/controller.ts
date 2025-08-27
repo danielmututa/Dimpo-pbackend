@@ -160,23 +160,18 @@ export const addProductToCartHandler = async (
   request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
   reply: FastifyReply
 ) => {
-  console.log(`🔥 CART HANDLER HIT - Request received!`);
-  console.log(`Request params:`, request.params);
-  console.log(`Request body:`, request.body);
-  
   try {
     const { userId } = request.params;
     const { productId, quantity } = request.body;
 
-    console.log(`🔥 About to call addProductToCart with:`, { userId: parseInt(userId), productId, quantity });
-    
     const cartItem = await addProductToCart(parseInt(userId), productId, quantity);
+
     reply.send(cartItem);
-  } catch (error: any) {
-    console.log(`🔥 ERROR in handler:`, error.message);
-    reply.status(500).send({ message: 'Error adding product to cart', error: error.message });
+  } catch (error) {
+    reply.status(400).send({ message: 'Error adding product to cart', error: (error as Error).message });
   }
 };
+
 
 export const updateCartItemQuantityHandler = async (
   request: FastifyRequest<{ Params: { cartItemId: string; userId: string }; Body: { quantity: number } }>,
