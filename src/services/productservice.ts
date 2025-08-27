@@ -315,8 +315,6 @@ export const createProduct = async (
 
 
 export const addProductToCart = async (userId: number, productId: number, quantity: number) => {
-  console.log(`Adding to cart - UserId: ${userId}, ProductId: ${productId}, Quantity: ${quantity}`);
-     
   const product = await prisma.products.findUnique({
     where: { id: productId }
   });
@@ -324,8 +322,6 @@ export const addProductToCart = async (userId: number, productId: number, quanti
   if (!product) {
     throw new Error('Product not found');
   }
-
-  console.log(`Product found - Stock: ${product.stock_quantity}, Price: ${product.price}`);
 
   const existingCartItem = await prisma.cart.findFirst({
     where: {
@@ -335,18 +331,17 @@ export const addProductToCart = async (userId: number, productId: number, quanti
   });
 
   const productPrice = new Prisma.Decimal(product.price);
-  const currentStock = product.stock_quantity ?? 0;
+  const originalStock = product.stock_quantity ?? 0;
 
   if (existingCartItem) {
-    const currentCartQuantity = existingCartItem.quantity;
-    const newTotalQuantity = currentCartQuantity + quantity;
+    const newTotalQuantity = existingCartItem.quantity + quantity;
     
-    // Check if total cart quantity exceeds available stock
-    if (newTotalQuantity > currentStock) {
-      throw new Error(`Insufficient stock. Only ${currentStock} items available, you already have ${currentCartQuantity} in cart.`);
+    // ✅ Check against ORIGINAL stock, not decremented stock
+    if (newTotalQuantity > originalStock) {
+      throw new Error(`Insufficient stock. Only ${originalStock} items available total.`);
     }
 
-    // ✅ DON'T decrement stock here - do it at checkout
+    // ✅ Update cart item (don't touch product stock until checkout)
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
@@ -357,12 +352,11 @@ export const addProductToCart = async (userId: number, productId: number, quanti
       include: { products: true }
     });
   } else {
-    // New item in cart
-    if (quantity > currentStock) {
-      throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
+    if (quantity > originalStock) {
+      throw new Error(`Insufficient stock. Only ${originalStock} items available.`);
     }
 
-    // ✅ DON'T decrement stock here - do it at checkout
+    // ✅ Create cart item (don't touch product stock until checkout)
     return await prisma.cart.create({
       data: {
         user_id: userId,
