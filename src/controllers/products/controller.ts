@@ -10,7 +10,6 @@ import {
   deleteCartItem,
   getUserCart,
   getAllProductImages,
-  clearUserCart
 } from '../../services/productservice';
 import { productSchema } from '../../models/products';
 import { z } from 'zod';
@@ -104,47 +103,39 @@ export const getProductImagesHandler = async (
   }
 };
 
-// Get user's cart handler
 export const getUserCartHandler = async (
-  request: FastifyRequest,
+  request: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
 ) => {
   try {
-    const userId = request.user?.id; // auth/session logic
-    if (!userId) {
-      reply.status(401).send({ message: 'Unauthorized' });
+    const { userId } = request.params;
+    const cartItems = await getUserCart(parseInt(userId));
+    if (!cartItems) {
+      reply.status(404).send({ message: 'Cart not found' });
       return;
     }
-
-    const cartItems = await getUserCart(userId);
     reply.send(cartItems);
   } catch (error) {
-    reply.status(500).send({ message: 'Error fetching cart items', error: (error as Error).message });
+    reply.status(500).send({ message: 'Error fetching cart items' });
   }
 };
+
 export const deleteCartItemHandler = async (
-  request: FastifyRequest<{ Params: { cartItemId: string } }>,
+  request: FastifyRequest<{ Params: { cartItemId: string; userId: string } }>,
   reply: FastifyReply
 ) => {
   try {
-    const { cartItemId } = request.params;
-
-    const userId = request.user?.id; // auth/session logic
-    if (!userId) {
-      reply.status(401).send({ message: 'Unauthorized' });
-      return;
-    }
-
-    const deletedItem = await deleteCartItem(parseInt(cartItemId), userId);
+    const { cartItemId, userId } = request.params;
+    const deletedItem = await deleteCartItem(parseInt(cartItemId), parseInt(userId));
     if (!deletedItem) {
       reply.status(404).send({ message: 'Cart item not found' });
       return;
     }
     reply.send(deletedItem);
   } catch (error) {
-    reply.status(500).send({ message: 'Error deleting cart item', error: (error as Error).message });
+    reply.status(500).send({ message: 'Error deleting cart item' });
   }
-}
+};
 
 // export const addProductToCartHandler = async (
 //   request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
@@ -166,70 +157,37 @@ export const deleteCartItemHandler = async (
 
 
 export const addProductToCartHandler = async (
-  request: FastifyRequest<{ Body: { productId: number; quantity: number } }>,
+  request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
   reply: FastifyReply
 ) => {
   try {
+    const { userId } = request.params;
     const { productId, quantity } = request.body;
 
-    // Assume userId comes from auth/session
-    const userId = request.user?.id; // replace with your auth logic
-    if (!userId) {
-      reply.status(401).send({ message: 'Unauthorized' });
-      return;
-    }
+    const cartItem = await addProductToCart(parseInt(userId), productId, quantity);
 
-    const cartItem = await addProductToCart(productId, quantity, userId);
     reply.send(cartItem);
   } catch (error) {
     reply.status(400).send({ message: 'Error adding product to cart', error: (error as Error).message });
   }
 };
 
-// Update cart item quantity handler
+
 export const updateCartItemQuantityHandler = async (
-  request: FastifyRequest<{ Params: { cartItemId: string }; Body: { quantity: number } }>,
+  request: FastifyRequest<{ Params: { cartItemId: string; userId: string }; Body: { quantity: number } }>,
   reply: FastifyReply
 ) => {
   try {
-    const { cartItemId } = request.params;
+    const { cartItemId, userId } = request.params;
     const { quantity } = request.body;
-
-    const userId = request.user?.id; // auth/session logic
-    if (!userId) {
-      reply.status(401).send({ message: 'Unauthorized' });
-      return;
-    }
-
-    const updatedItem = await updateCartItemQuantity(parseInt(cartItemId), userId, quantity);
+    const updatedItem = await updateCartItemQuantity(parseInt(cartItemId), parseInt(userId), quantity);
     if (!updatedItem) {
       reply.status(404).send({ message: 'Cart item not found' });
       return;
     }
     reply.send(updatedItem);
   } catch (error) {
-    reply.status(500).send({ message: 'Error updating cart item quantity', error: (error as Error).message });
-  }
-};
-
-
-
-// Clear user's cart handler
-export const clearUserCartHandler = async (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
-  try {
-    const userId = request.user?.id; // auth/session logic
-    if (!userId) {
-      reply.status(401).send({ message: 'Unauthorized' });
-      return;
-    }
-
-    await clearUserCart(userId);
-    reply.send({ message: 'Cart cleared successfully' });
-  } catch (error) {
-    reply.status(500).send({ message: 'Error clearing cart', error: (error as Error).message });
+    reply.status(500).send({ message: 'Error updating cart item quantity' });
   }
 };
 
