@@ -314,13 +314,9 @@ export const createProduct = async (
 
 
 
-export const addProductToCart = async (
-  userId: number,
-  productId: number,
-  quantity: number
-) => {
+export const addProductToCart = async (userId: number, productId: number, quantity: number) => {
   console.log(`Adding to cart - UserId: ${userId}, ProductId: ${productId}, Quantity: ${quantity}`);
-  
+     
   const product = await prisma.products.findUnique({
     where: { id: productId }
   });
@@ -331,44 +327,26 @@ export const addProductToCart = async (
 
   console.log(`Product found - Stock: ${product.stock_quantity}, Price: ${product.price}`);
 
-  // Check if item already in cart for this user
   const existingCartItem = await prisma.cart.findFirst({
-    where: { 
-      product_id: productId, 
-      user_id: userId 
+    where: {
+       product_id: productId,
+       user_id: userId 
     }
   });
-
-  console.log('Existing cart item:', existingCartItem);
 
   const productPrice = new Prisma.Decimal(product.price);
   const currentStock = product.stock_quantity ?? 0;
 
   if (existingCartItem) {
-    // Item already exists in cart
     const currentCartQuantity = existingCartItem.quantity;
     const newTotalQuantity = currentCartQuantity + quantity;
     
-    console.log(`Existing item - Current cart qty: ${currentCartQuantity}, Adding: ${quantity}, New total: ${newTotalQuantity}, Available stock: ${currentStock}`);
-    
-    // Check if we have enough stock for the additional quantity
-    // Note: We should check against current stock, not total quantity needed
-    // because some stock might already be "reserved" in cart
-    if (currentStock < quantity) {
-      console.log(`Insufficient stock - Trying to add ${quantity}, but only ${currentStock} available`);
-      throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
+    // Check if total cart quantity exceeds available stock
+    if (newTotalQuantity > currentStock) {
+      throw new Error(`Insufficient stock. Only ${currentStock} items available, you already have ${currentCartQuantity} in cart.`);
     }
 
-    // Update product stock - decrement by the quantity being added
-    await prisma.products.update({
-      where: { id: productId },
-      data: {
-        stock_quantity: { decrement: quantity },
-        updated_at: new Date()
-      }
-    });
-
-    // Update cart item
+    // ✅ DON'T decrement stock here - do it at checkout
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
@@ -380,23 +358,11 @@ export const addProductToCart = async (
     });
   } else {
     // New item in cart
-    console.log(`New item - Requesting qty: ${quantity}, Available stock: ${currentStock}`);
-    
-    if (currentStock < quantity) {
-      console.log(`Insufficient stock - Trying to add ${quantity}, but only ${currentStock} available`);
+    if (quantity > currentStock) {
       throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
     }
 
-    // Update product stock
-    await prisma.products.update({
-      where: { id: productId },
-      data: {
-        stock_quantity: { decrement: quantity },
-        updated_at: new Date()
-      }
-    });
-
-    // Create new cart item
+    // ✅ DON'T decrement stock here - do it at checkout
     return await prisma.cart.create({
       data: {
         user_id: userId,
