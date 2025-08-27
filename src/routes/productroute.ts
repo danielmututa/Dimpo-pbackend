@@ -199,20 +199,17 @@ export default async (fastify: FastifyInstance) => {
     },
   });
 
-  fastify.get('/:userId/cart', productController.getUserCartHandler);
+ 
+ 
 
-  fastify.put('/:userId/cart/:cartItemId', {
-    handler: productController.updateCartItemQuantityHandler,
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          quantity: { type: 'number', minimum: 1 },
-        },
-        required: ['quantity'],
-      },
-    },
-  });
+   fastify.get('/products/:productId/add-to-cart', productController.addProductToCartHandler);
 
-  fastify.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
+  // Get all cart items
+  fastify.get('/cart', productController.getCartHandler);
+
+  // Update cart item quantity
+  fastify.put('/cart/:cartItemId', productController.updateCartItemQuantityHandler);
+
+  // Delete cart item
+  fastify.delete('/cart/:cartItemId', productController.deleteCartItemHandler);
 };

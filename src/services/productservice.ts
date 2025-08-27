@@ -99,6 +99,7 @@ export const createProduct = async (
 
 
 
+
 // export const addProductToCart = async (
 //   userId: number,
 //   productId: number,
@@ -131,29 +132,17 @@ export const createProduct = async (
 
 //   if (existingCartItem) {
 //     // Item already exists in cart
-//     const currentCartQuantity = existingCartItem.quantity;
-//     const newTotalQuantity = currentCartQuantity + quantity;
+//     const newTotalQuantity = existingCartItem.quantity + quantity;
     
-//     console.log(`Existing item - Current cart qty: ${currentCartQuantity}, Adding: ${quantity}, New total: ${newTotalQuantity}, Available stock: ${currentStock}`);
+//     console.log(`Existing item - Current cart qty: ${existingCartItem.quantity}, Adding: ${quantity}, New total: ${newTotalQuantity}, Available stock: ${currentStock}`);
     
-//     // Check if we have enough stock for the additional quantity
-//     // Note: We should check against current stock, not total quantity needed
-//     // because some stock might already be "reserved" in cart
-//     if (currentStock < quantity) {
-//       console.log(`Insufficient stock - Trying to add ${quantity}, but only ${currentStock} available`);
-//       throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
+//     // Check if we have enough stock for the new total quantity
+//     if (currentStock < newTotalQuantity) {
+//       console.log(`Insufficient stock - Requesting total ${newTotalQuantity}, but only ${currentStock} available`);
+//       throw new Error(`Insufficient stock. Only ${currentStock} items available, you already have ${existingCartItem.quantity} in cart.`);
 //     }
 
-//     // Update product stock - decrement by the quantity being added
-//     await prisma.products.update({
-//       where: { id: productId },
-//       data: {
-//         stock_quantity: { decrement: quantity },
-//         updated_at: new Date()
-//       }
-//     });
-
-//     // Update cart item
+//     // Update cart item (don't touch product stock yet)
 //     return await prisma.cart.update({
 //       where: { id: existingCartItem.id },
 //       data: {
@@ -172,16 +161,7 @@ export const createProduct = async (
 //       throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
 //     }
 
-//     // Update product stock
-//     await prisma.products.update({
-//       where: { id: productId },
-//       data: {
-//         stock_quantity: { decrement: quantity },
-//         updated_at: new Date()
-//       }
-//     });
-
-//     // Create new cart item
+//     // Create new cart item (don't touch product stock yet)
 //     return await prisma.cart.create({
 //       data: {
 //         user_id: userId,
@@ -196,51 +176,40 @@ export const createProduct = async (
 //   }
 // };
 
-
-
+// Add product to cart (global, no userId)
 export const addProductToCart = async (
-  userId: number,
   productId: number,
-  quantity: number
+  quantity: number = 1
 ) => {
-  console.log(`Adding to cart - UserId: ${userId}, ProductId: ${productId}, Quantity: ${quantity}`);
-  
+  console.log(`Adding to cart - ProductId: ${productId}, Quantity: ${quantity}`);
+
   const product = await prisma.products.findUnique({
     where: { id: productId }
   });
 
-  if (!product) {
-    throw new Error('Product not found');
+  if (!product) throw new Error("Product not found");
+
+  const currentStock = product.stock_quantity ?? 0;
+  const productPrice = new Prisma.Decimal(product.price);
+
+  if (currentStock < quantity) {
+    throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
   }
 
-  console.log(`Product found - Stock: ${product.stock_quantity}, Price: ${product.price}`);
-
-  // Check if item already in cart for this user
-  const existingCartItem = await prisma.cart.findFirst({
-    where: { 
-      product_id: productId, 
-      user_id: userId 
-    }
+  // Decrease stock immediately
+  await prisma.products.update({
+    where: { id: productId },
+    data: { stock_quantity: currentStock - quantity }
   });
 
-  console.log('Existing cart item:', existingCartItem);
-
-  const productPrice = new Prisma.Decimal(product.price);
-  const currentStock = product.stock_quantity ?? 0;
+  // Add/update cart
+  const existingCartItem = await prisma.cart.findFirst({
+    where: { product_id: productId }
+  });
 
   if (existingCartItem) {
-    // Item already exists in cart
     const newTotalQuantity = existingCartItem.quantity + quantity;
-    
-    console.log(`Existing item - Current cart qty: ${existingCartItem.quantity}, Adding: ${quantity}, New total: ${newTotalQuantity}, Available stock: ${currentStock}`);
-    
-    // Check if we have enough stock for the new total quantity
-    if (currentStock < newTotalQuantity) {
-      console.log(`Insufficient stock - Requesting total ${newTotalQuantity}, but only ${currentStock} available`);
-      throw new Error(`Insufficient stock. Only ${currentStock} items available, you already have ${existingCartItem.quantity} in cart.`);
-    }
 
-    // Update cart item (don't touch product stock yet)
     return await prisma.cart.update({
       where: { id: existingCartItem.id },
       data: {
@@ -251,18 +220,8 @@ export const addProductToCart = async (
       include: { products: true }
     });
   } else {
-    // New item in cart
-    console.log(`New item - Requesting qty: ${quantity}, Available stock: ${currentStock}`);
-    
-    if (currentStock < quantity) {
-      console.log(`Insufficient stock - Trying to add ${quantity}, but only ${currentStock} available`);
-      throw new Error(`Insufficient stock. Only ${currentStock} items available.`);
-    }
-
-    // Create new cart item (don't touch product stock yet)
     return await prisma.cart.create({
       data: {
-        user_id: userId,
         product_id: productId,
         quantity,
         price: productPrice.mul(quantity),
@@ -276,108 +235,29 @@ export const addProductToCart = async (
 
 
 
-// export const updateCartItemQuantity = async (
-//   cartItemId: number,
-//   userId: number,
-//   newQuantity: number
-// ) => {
-//   // Delete the item if quantity is zero or less
-//   if (newQuantity <= 0) {
-//     return await deleteCartItem(cartItemId, userId);
-//   }
-
-//   // Get cart item with product info
-//   const cartItem = await prisma.cart.findFirst({
-//     where: {
-//       id: cartItemId,
-//       user_id: userId
-//     },
-//     include: {
-//       products: {
-//         select: {
-//           id: true,
-//           price: true,
-//           stock_quantity: true
-//         }
-//       }
-//     }
-//   });
-
-//   if (!cartItem || !cartItem.products) {
-//     throw new Error('Cart item not found');
-//   }
-
-//   const product = cartItem.products;
-
-//   // Check stock
-//   if ((product.stock_quantity ?? 0) < newQuantity) {
-//     throw new Error('Insufficient stock');
-//   }
-
-//   // Update stock: restore old quantity, then decrement new quantity
-//   const stockAdjustment = newQuantity - cartItem.quantity;
-
-//   await prisma.products.update({
-//     where: { id: product.id },
-//     data: {
-//       stock_quantity: { decrement: stockAdjustment },
-//       updated_at: new Date()
-//     }
-//   });
-
-//   // Update cart item
-//   const productPrice = new Prisma.Decimal(product.price);
-
-//   return await prisma.cart.update({
-//     where: { id: cartItemId },
-//     data: {
-//       quantity: newQuantity,
-//       price: productPrice.mul(newQuantity),
-//       updated_at: new Date()
-//     },
-//     include: { products: true }
-//   });
-// };
-
+// Update cart item quantity (global)
 export const updateCartItemQuantity = async (
   cartItemId: number,
-  userId: number,
   newQuantity: number
 ) => {
-  // Delete the item if quantity is zero or less
   if (newQuantity <= 0) {
-    return await deleteCartItem(cartItemId, userId);
+    return await deleteCartItem(cartItemId);
   }
 
-  // Get cart item with product info
-  const cartItem = await prisma.cart.findFirst({
-    where: {
-      id: cartItemId,
-      user_id: userId
-    },
-    include: {
-      products: {
-        select: {
-          id: true,
-          price: true,
-          stock_quantity: true
-        }
-      }
-    }
+  const cartItem = await prisma.cart.findUnique({
+    where: { id: cartItemId },
+    include: { products: true }
   });
 
   if (!cartItem || !cartItem.products) {
-    throw new Error('Cart item not found');
+    throw new Error("Cart item not found");
   }
 
   const product = cartItem.products;
-
-  // Check if we have enough stock for the new quantity
   if ((product.stock_quantity ?? 0) < newQuantity) {
     throw new Error(`Insufficient stock. Only ${product.stock_quantity} items available.`);
   }
 
-  // Update cart item (don't touch product stock)
   const productPrice = new Prisma.Decimal(product.price);
 
   return await prisma.cart.update({
@@ -392,105 +272,38 @@ export const updateCartItemQuantity = async (
 };
 
 
-// Remove item from cart
-// export const deleteCartItem = async (
-//   cartItemId: number, 
-//   userId: number,
-//   data?: Partial<z.infer<typeof productSchema>> 
-// ) => {
-//   const cartItem = await prisma.cart.findFirst({
-//     where: {
-//       id: cartItemId,
-//       user_id: userId
-//     },
-//     include: {
-//       products: {
-//         select: {
-//           id: true,
-//           stock_quantity: true
-//         }
-//       }
-//     }
-//   });
 
-//   if (!cartItem) {
-//     throw new Error('Cart item not found or does not belong to user');
-//   }
-
-//   // Restore product stock if product data is provided
-//   if (data && cartItem.products) {
-//     await prisma.products.update({
-//       where: { id: cartItem.products.id },
-//       data: {
-//         stock_quantity: {
-//           increment: cartItem.quantity
-//         },
-//         updated_at: new Date()
-//       }
-//     });
-//   }
-
-//   return await prisma.cart.delete({
-//     where: { id: cartItemId }
-//   });
-// };
-
-export const deleteCartItem = async (
-  cartItemId: number, 
-  userId: number,
-  data?: Partial<z.infer<typeof productSchema>> 
-) => {
-  const cartItem = await prisma.cart.findFirst({
-    where: {
-      id: cartItemId,
-      user_id: userId
-    },
-    include: {
-      products: {
-        select: {
-          id: true,
-          stock_quantity: true
-        }
-      }
-    }
-  });
+// Delete cart item (global)
+export const deleteCartItem = async (cartItemId: number) => {
+  const cartItem = await prisma.cart.findUnique({ where: { id: cartItemId } });
 
   if (!cartItem) {
-    throw new Error('Cart item not found or does not belong to user');
+    throw new Error("Cart item not found");
   }
 
-  // Just delete the cart item (don't restore stock)
-  return await prisma.cart.delete({
-    where: { id: cartItemId }
-  });
+  return await prisma.cart.delete({ where: { id: cartItemId } });
 };
 
 
 // Get user's cart
-export const getUserCart = async (userId: number) => {
+// Get cart (global)
+export const getCart = async () => {
   const cartItems = await prisma.cart.findMany({
-    where: { user_id: userId },
     include: {
-      products: {
-        include: {
-          categories: true
-        }
-      }
+      products: { include: { categories: true } }
     }
   });
 
-  // Convert all prices to Decimal for safe calculations
-  const subtotal = cartItems.reduce((sum, item) => {
-    return sum.add(new Prisma.Decimal(item.price || 0));
-  }, new Prisma.Decimal(0));
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum.add(new Prisma.Decimal(item.price || 0)),
+    new Prisma.Decimal(0)
+  );
 
   const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-  // Calculate discounts using Decimal
   const totalDiscount = cartItems.reduce((sum, item) => {
     const discount = item.products?.discount_percentage || 0;
-    const itemPrice = new Prisma.Decimal(item.price || 0);
-    return sum.add(itemPrice.mul(discount).div(100));
+    return sum.add(new Prisma.Decimal(item.price || 0).mul(discount).div(100));
   }, new Prisma.Decimal(0));
 
   return {
@@ -501,12 +314,13 @@ export const getUserCart = async (userId: number) => {
     grandTotal: subtotal.minus(totalDiscount).toNumber()
   };
 };
-// Clear user's cart
-export const clearUserCart = async (userId: number) => {
-  return await prisma.cart.deleteMany({
-    where: { user_id: userId }
-  });
+
+// Clear cart (global)
+export const clearCart = async () => {
+  return await prisma.cart.deleteMany();
 };
+  
+
 
 
 // Update product

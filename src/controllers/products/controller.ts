@@ -8,7 +8,7 @@ import {
   addProductToCart,
   updateCartItemQuantity,
   deleteCartItem,
-  getUserCart,
+ getCart,
   getAllProductImages,
 } from '../../services/productservice';
 import { productSchema } from '../../models/products';
@@ -103,76 +103,86 @@ export const getProductImagesHandler = async (
   }
 };
 
-export const getUserCartHandler = async (
-  request: FastifyRequest<{ Params: { userId: string } }>,
+// Get all items in cart (global, since no userId)
+export const getCartHandler = async (
+  request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const { userId } = request.params;
-    const cartItems = await getUserCart(parseInt(userId));
-    if (!cartItems) {
-      reply.status(404).send({ message: 'Cart not found' });
+    const cart = await getCart(); // no userId needed
+    if (!cart.items || cart.items.length === 0) {
+      reply.status(404).send({ message: "Cart is empty" });
       return;
     }
-    reply.send(cartItems);
+    reply.send(cart);
   } catch (error) {
-    reply.status(500).send({ message: 'Error fetching cart items' });
+    reply.status(500).send({ message: "Error fetching cart items", error: (error as Error).message });
   }
 };
 
+
+
+// Delete cart item (global)
 export const deleteCartItemHandler = async (
-  request: FastifyRequest<{ Params: { cartItemId: string; userId: string } }>,
+  request: FastifyRequest<{ Params: { cartItemId: string } }>,
   reply: FastifyReply
 ) => {
   try {
-    const { cartItemId, userId } = request.params;
-    const deletedItem = await deleteCartItem(parseInt(cartItemId), parseInt(userId));
+    const { cartItemId } = request.params;
+    const deletedItem = await deleteCartItem(parseInt(cartItemId));
     if (!deletedItem) {
-      reply.status(404).send({ message: 'Cart item not found' });
+      reply.status(404).send({ message: "Cart item not found" });
       return;
     }
     reply.send(deletedItem);
   } catch (error) {
-    reply.status(500).send({ message: 'Error deleting cart item' });
+    reply.status(500).send({ message: "Error deleting cart item" });
   }
 };
 
 
 
+// Add product to cart (no userId required)
 export const addProductToCartHandler = async (
-  request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
+  request: FastifyRequest<{ Params: { productId: string }; Querystring: { qty?: string } }>,
   reply: FastifyReply
 ) => {
   try {
-    const { userId } = request.params;
-    const { productId, quantity } = request.body;
+    const { productId } = request.params;
+    const quantity = request.query.qty ? parseInt(request.query.qty) : 1;
 
-    const cartItem = await addProductToCart(parseInt(userId), productId, quantity);
+    const cartItem = await addProductToCart(parseInt(productId), quantity);
 
     reply.send(cartItem);
   } catch (error) {
-    reply.status(400).send({ message: 'Error adding product to cart', error: (error as Error).message });
+    reply
+      .status(400)
+      .send({ message: "Error adding product to cart", error: (error as Error).message });
   }
 };
 
 
+
+// Update cart item quantity (global)
 export const updateCartItemQuantityHandler = async (
-  request: FastifyRequest<{ Params: { cartItemId: string; userId: string }; Body: { quantity: number } }>,
+  request: FastifyRequest<{ Params: { cartItemId: string }; Body: { quantity: number } }>,
   reply: FastifyReply
 ) => {
   try {
-    const { cartItemId, userId } = request.params;
+    const { cartItemId } = request.params;
     const { quantity } = request.body;
-    const updatedItem = await updateCartItemQuantity(parseInt(cartItemId), parseInt(userId), quantity);
+
+    const updatedItem = await updateCartItemQuantity(parseInt(cartItemId), quantity);
     if (!updatedItem) {
-      reply.status(404).send({ message: 'Cart item not found' });
+      reply.status(404).send({ message: "Cart item not found" });
       return;
     }
     reply.send(updatedItem);
   } catch (error) {
-    reply.status(500).send({ message: 'Error updating cart item quantity' });
+    reply.status(500).send({ message: "Error updating cart item quantity" });
   }
 };
+
 
 export const getProductHandler = async (
   request: FastifyRequest<{ Params: ProductParams }>,
