@@ -135,6 +135,7 @@ declare module '@fastify/jwt' {
   }
 }
 
+
 // Register routes
 app.register(authRoutes, { prefix: '/api/auth' });
 app.register(productRoutes, { prefix: '/api/products' });

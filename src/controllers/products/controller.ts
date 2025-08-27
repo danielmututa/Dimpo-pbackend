@@ -137,40 +137,53 @@ export const deleteCartItemHandler = async (
   }
 };
 
-// export const addProductToCartHandler = async (
-//   request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
-//   reply: FastifyReply
-// ) => {
-//   try {
-//     const { userId } = request.params;
-//     const { productId, quantity } = request.body;
-//     const cartItem = await addProductToCart(parseInt(userId), productId, quantity, {});
-//     if (!cartItem) {
-//       reply.status(404).send({ message: 'Product not found' });
-//       return;
-//     }
-//     reply.send(cartItem);
-//   } catch (error) {
-//     reply.status(500).send({ message: 'Error adding product to cart', error: (error as Error).message });
-//   }
-// };
+
 
 
 export const addProductToCartHandler = async (
-  request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
+  request: FastifyRequest<{ 
+    Params: { userId: string }; 
+    Body: { productId: number; quantity: number } 
+  }>,
   reply: FastifyReply
 ) => {
+  console.log(`🔥 CART HANDLER HIT - Request received!`);
+  console.log(`Request params:`, request.params);
+  console.log(`Request body:`, request.body);
+  
   try {
     const { userId } = request.params;
     const { productId, quantity } = request.body;
 
-    const cartItem = await addProductToCart(parseInt(userId), productId, quantity);
+    // Convert string to number and validate
+    const userIdNum = parseInt(userId, 10);
+    const productIdNum = typeof productId === 'string' ? parseInt(productId, 10) : productId;
+    const quantityNum = typeof quantity === 'string' ? parseInt(quantity, 10) : quantity;
 
+    if (isNaN(userIdNum) || isNaN(productIdNum) || isNaN(quantityNum)) {
+      return reply.status(400).send({ 
+        message: 'Invalid parameters', 
+        error: 'userId, productId, and quantity must be valid numbers' 
+      });
+    }
+
+    console.log(`🔥 About to call addProductToCart with:`, { 
+      userId: userIdNum, 
+      productId: productIdNum, 
+      quantity: quantityNum 
+    });
+    
+    const cartItem = await addProductToCart(userIdNum, productIdNum, quantityNum);
     reply.send(cartItem);
-  } catch (error) {
-    reply.status(400).send({ message: 'Error adding product to cart', error: (error as Error).message });
+  } catch (error: any) {
+    console.log(`🔥 ERROR in handler:`, error.message);
+    reply.status(500).send({ 
+      message: 'Error adding product to cart', 
+      error: error.message 
+    });
   }
 };
+
 
 
 export const updateCartItemQuantityHandler = async (
