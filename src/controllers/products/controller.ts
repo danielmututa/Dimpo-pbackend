@@ -137,23 +137,6 @@ export const deleteCartItemHandler = async (
   }
 };
 
-// export const addProductToCartHandler = async (
-//   request: FastifyRequest<{ Params: { userId: string }; Body: { productId: number; quantity: number } }>,
-//   reply: FastifyReply
-// ) => {
-//   try {
-//     const { userId } = request.params;
-//     const { productId, quantity } = request.body;
-//     const cartItem = await addProductToCart(parseInt(userId), productId, quantity, {});
-//     if (!cartItem) {
-//       reply.status(404).send({ message: 'Product not found' });
-//       return;
-//     }
-//     reply.send(cartItem);
-//   } catch (error) {
-//     reply.status(500).send({ message: 'Error adding product to cart', error: (error as Error).message });
-//   }
-// };
 
 
 export const addProductToCartHandler = async (
