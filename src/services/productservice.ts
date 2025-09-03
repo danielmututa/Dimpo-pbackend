@@ -353,11 +353,12 @@ export const updateCartItemQuantity = async (
     prisma.products.update({
       where: { id: product.id },
       data: {
-        stock_quantity: { decrement: quantityDifference }, // This will add back if negative
+        stock_quantity: { decrement: quantityDifference }, // This will add back if negative ...
         updated_at: new Date()
       }
     })
   ]);
+
 
   return updatedCartItem;
 };
@@ -554,6 +555,15 @@ export const getAllProductImages = async () => {
   });
   return products.map((product) => product.image_url); // Return an array of image URLs
 };
+
+
+
+
+
+
+
+
+
 
 
 

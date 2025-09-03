@@ -6,6 +6,7 @@ import prisma from './config/db';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/productroute';
 import blogRoutes from './routes/blog';
+import aiRoutes from './routes/aiRouts';
 import analytics from './routes/analytics';
 import oderRoutes from './routes/order';
 import { JwtUser } from './utils/jwt';
@@ -99,7 +100,14 @@ app.register(cors, {
 // });
 
 
-app.register(multipart);
+// app.register(multipart);// In your main server file (around line 55)
+app.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+    files: 3, // Maximum 3 files
+    fieldSize: 1024 * 1024, // 1MB field size limit
+  }
+});
 
 // Serve static uploads with proper CORS headers
 app.register(fastifyStatic, {
@@ -142,6 +150,7 @@ app.register(productRoutes, { prefix: '/api/products' });
 app.register(blogRoutes, { prefix: '/api/blogs' });
 app.register(analytics, { prefix: '/api/analytics' });
 app.register(oderRoutes, { prefix: '/api/order' });
+app.register(aiRoutes, { prefix: '/api/assitence' });
 
 // Health check endpoint  
 // ...............here
