@@ -10,6 +10,12 @@ import {
   deleteCartItem,
   getUserCart,
   getAllProductImages,
+    ReviewService, 
+  ReviewLikeService, 
+  ReviewCommentService, 
+  ProductViewService 
+  // addReview, 
+  // getProductReviews
 } from '../../services/productservice';
 import { productSchema } from '../../models/products';
 import { z } from 'zod';
@@ -18,6 +24,7 @@ import { pipeline } from 'stream';
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
+
 
 const pump = util.promisify(pipeline);
 
@@ -253,3 +260,326 @@ export const deleteProductHandler = async (
     reply.status(500).send({ message: 'Error deleting product' });
   }
 };
+
+
+// ------------------- REVIEWS -------------------
+// export const addReviewHandler = async (
+//   request: FastifyRequest<{ Params: { id: string }; Body: { user_id?: number; rating: number; comment: string } }>,
+//   reply: FastifyReply
+// ) => {
+//   try {
+//     const { id } = request.params;
+//     const review = await addReview(parseInt(id), request.body);
+//     reply.status(201).send(review);
+//   } catch (error: any) {
+//     reply.status(400).send({ message: "Error adding review", error: error.message });
+//   }
+// };
+
+
+
+// export const addReviewHandler = async (
+//   request: FastifyRequest<{ 
+//     Params: { id: string }; 
+//     Body: { user_id: number; rating: number; comment: string } 
+//   }>,
+//   reply: FastifyReply
+// ) => {
+//   try {
+//     const { id } = request.params;
+//     const { user_id, rating, comment } = request.body;
+
+//     // Validate required fields
+//     if (!user_id || !rating || !comment?.trim()) {
+//       return reply.status(400).send({ 
+//         message: "Missing required fields: user_id, rating, and comment are required" 
+//       });
+//     }
+
+//     if (rating < 1 || rating > 5) {
+//       return reply.status(400).send({ 
+//         message: "Rating must be between 1 and 5" 
+//       });
+//     }
+
+//     const review = await addReview(parseInt(id), request.body);
+//     reply.status(201).send(review);
+//   } catch (error: any) {
+//     reply.status(500).send({ message: "Error adding review", error: error.message });
+//   }
+// };
+
+
+
+// export const getReviewsHandler = async (
+//   request: FastifyRequest<{ Params: { id: string } }>,
+//   reply: FastifyReply
+// ) => {
+//   try {
+//     const { id } = request.params;
+//     const reviews = await getProductReviews(parseInt(id));
+//     reply.send(reviews);
+//   } catch (error: any) {
+//     reply.status(400).send({ message: "Error fetching reviews", error: error.message });
+//   }
+// };
+
+
+
+
+
+export class ReviewController {
+  static async addReview(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: { user_id: number; rating: number; comment: string }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const { user_id, rating, comment } = request.body;
+
+      if (!user_id || !rating || !comment?.trim()) {
+        return reply.status(400).send({
+          message: "Missing required fields: user_id, rating, and comment are required"
+        });
+      }
+
+      if (rating < 1 || rating > 5) {
+        return reply.status(400).send({
+          message: "Rating must be between 1 and 5"
+        });
+      }
+
+      const review = await ReviewService.addReview(parseInt(id), request.body);
+      reply.status(201).send(review);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error adding review", error: error.message });
+    }
+  }
+
+  static async getReviews(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const reviews = await ReviewService.getProductReviews(parseInt(id));
+      reply.send(reviews);
+    } catch (error: any) {
+      reply.status(400).send({ message: "Error fetching reviews", error: error.message });
+    }
+  }
+
+  static async deleteReview(
+    request: FastifyRequest<{
+      Params: { reviewId: string };
+      Body: { user_id?: number }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { reviewId } = request.params;
+      const { user_id } = request.body;
+
+      await ReviewService.deleteReview(parseInt(reviewId), user_id);
+      reply.send({ message: "Review deleted successfully" });
+    } catch (error: any) {
+      reply.status(400).send({ message: error.message });
+    }
+  }
+}
+
+export class ReviewLikeController {
+  static async toggleLike(
+    request: FastifyRequest<{
+      Params: { reviewId: string };
+      Body: { user_id: number; is_like: boolean }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { reviewId } = request.params;
+      const { user_id, is_like } = request.body;
+
+      if (!user_id) {
+        return reply.status(400).send({ message: "user_id is required" });
+      }
+
+      const result = await ReviewLikeService.toggleReviewLike(parseInt(reviewId), user_id, is_like);
+      reply.send(result);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error toggling like", error: error.message });
+    }
+  }
+
+  static async getLikeStatus(
+    request: FastifyRequest<{
+      Params: { reviewId: string };
+      Querystring: { user_id: string }  // Fixed: Changed Query to Querystring
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { reviewId } = request.params;
+      const { user_id } = request.query as { user_id: string }; // Fixed: Added type assertion
+
+      if (!user_id) {
+        return reply.status(400).send({ message: "user_id is required" });
+      }
+
+      const status = await ReviewLikeService.getReviewLikeStatus(parseInt(reviewId), parseInt(user_id));
+      reply.send({ like_status: status });
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error getting like status", error: error.message });
+    }
+  }
+}
+
+export class ReviewCommentController {
+  static async addComment(
+    request: FastifyRequest<{
+      Params: { reviewId: string };
+      Body: { user_id: number; comment: string }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { reviewId } = request.params;
+      const { user_id, comment } = request.body;
+
+      if (!comment?.trim()) {
+        return reply.status(400).send({ message: "Comment is required" });
+      }
+
+      const result = await ReviewCommentService.addReviewComment(parseInt(reviewId), { user_id, comment });
+      reply.status(201).send(result);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error adding comment", error: error.message });
+    }
+  }
+
+  static async getComments(
+    request: FastifyRequest<{ Params: { reviewId: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { reviewId } = request.params;
+      const comments = await ReviewCommentService.getReviewComments(parseInt(reviewId));
+      reply.send(comments);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error fetching comments", error: error.message });
+    }
+  }
+
+  static async deleteComment(
+    request: FastifyRequest<{
+      Params: { commentId: string };
+      Body: { user_id?: number }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { commentId } = request.params;
+      const { user_id } = request.body;
+
+      await ReviewCommentService.deleteReviewComment(parseInt(commentId), user_id);
+      reply.send({ message: "Comment deleted successfully" });
+    } catch (error: any) {
+      reply.status(400).send({ message: error.message });
+    }
+  }
+}
+
+export class ProductViewController {
+  static async trackView(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: { user_id?: number }
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const { user_id } = request.body;
+      
+      const ip_address = request.ip;
+      const user_agent = request.headers['user-agent'];
+
+      // Create the data object properly handling optional fields
+      const viewData: { 
+        user_id?: number; 
+        ip_address?: string; 
+        user_agent?: string 
+      } = {};
+
+      if (user_id !== undefined) {
+        viewData.user_id = user_id;
+      }
+      if (ip_address !== undefined) {
+        viewData.ip_address = ip_address;
+      }
+      if (user_agent !== undefined) {
+        viewData.user_agent = user_agent;
+      }
+
+      const view = await ProductViewService.trackProductView(parseInt(id), viewData);
+
+      if (view) {
+        reply.status(201).send({ message: "View tracked", view });
+      } else {
+        reply.send({ message: "View already tracked recently" });
+      }
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error tracking view", error: error.message });
+    }
+  }
+
+  static async getViewStats(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const stats = await ProductViewService.getProductViewCount(parseInt(id));
+      reply.send(stats);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error getting view stats", error: error.message });
+    }
+  }
+
+  static async getProductWithViews(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const product = await ProductViewService.getProductWithViews(parseInt(id));
+      
+      if (!product) {
+        return reply.status(404).send({ message: "Product not found" });
+      }
+      
+      reply.send(product);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error getting product with views", error: error.message });
+    }
+  }
+
+  static async getMostViewed(
+    request: FastifyRequest<{ 
+      Querystring: { limit?: string } // Fixed: Changed Query to Querystring
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { limit } = request.query as { limit?: string }; // Fixed: Added type assertion
+      const limitNumber = parseInt(limit || '10');
+      const products = await ProductViewService.getMostViewedProducts(limitNumber);
+      reply.send(products);
+    } catch (error: any) {
+      reply.status(500).send({ message: "Error getting most viewed products", error: error.message });
+    }
+  }
+}

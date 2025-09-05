@@ -3,7 +3,7 @@ import { cartSchema } from "./cart";
 import { orderItemSchema } from "./orderitem";
 import {orderSchema} from "./order"
 // import { categorySchema } from "./category";
-import { reviewSchema } from "./review";
+import { reviewSchema, reviewLikeSchema, reviewCommentSchema, productViewSchema } from "./review";
 
 
 export const productSchema = z.object({
@@ -21,6 +21,10 @@ export const productSchema = z.object({
   order_items: z.array(orderItemSchema).optional(), 
   category_name: z.string().optional(), 
   reviews: z.array(reviewSchema).optional(), 
+   review_likes: z.array(reviewLikeSchema).optional(),
+  review_comments: z.array(reviewCommentSchema).optional(),
+  product_views: z.array(productViewSchema).optional(),
+   
 });
 
 

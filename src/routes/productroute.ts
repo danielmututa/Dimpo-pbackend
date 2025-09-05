@@ -148,6 +148,12 @@ import { FastifyInstance } from 'fastify';
 import * as productController from '../controllers/products/controller';
 import { productSchema } from '../models/products';
 import { zodToJsonSchema } from '../utils/schemas';
+import { 
+  ReviewController, 
+  ReviewLikeController, 
+  ReviewCommentController, 
+  ProductViewController 
+} from '../controllers/products/controller';
 
 export default async (fastify: FastifyInstance) => {
   // Get all products
@@ -165,6 +171,37 @@ export default async (fastify: FastifyInstance) => {
     // Remove schema validation for body to allow multipart/form-data
     // Validation is handled manually in createProductHandler
   });
+
+// llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+    // ------------------- REVIEWS -------------------
+// fastify.post('/:id/reviews', productController.addReviewHandler);
+
+// fastify.get('/:id/reviews', productController.getReviewsHandler);
+
+
+
+  // ------------------- REVIEWS -------------------
+  fastify.post('/:id/reviews', ReviewController.addReview);
+  fastify.get('/:id/reviews', ReviewController.getReviews);
+  fastify.delete('/reviews/:reviewId', ReviewController.deleteReview);
+
+  // ------------------- REVIEW LIKES -------------------
+  fastify.post('/reviews/:reviewId/like', ReviewLikeController.toggleLike);
+  fastify.get('/reviews/:reviewId/like-status', ReviewLikeController.getLikeStatus);
+
+  // ------------------- REVIEW COMMENTS -------------------
+  fastify.post('/reviews/:reviewId/comments', ReviewCommentController.addComment);
+  fastify.get('/reviews/:reviewId/comments', ReviewCommentController.getComments);
+  fastify.delete('/review-comments/:commentId', ReviewCommentController.deleteComment);
+
+  // ------------------- PRODUCT VIEWS -------------------
+  fastify.post('/:id/view', ProductViewController.trackView);
+  fastify.get('/:id/views', ProductViewController.getViewStats);
+  fastify.get('/:id/with-views', ProductViewController.getProductWithViews);
+  fastify.get('/most-viewed', ProductViewController.getMostViewed);
+
+// lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+
 
   // Update product
   fastify.put('/:id', {
@@ -216,3 +253,10 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.delete('/:userId/cart/:cartItemId', productController.deleteCartItemHandler);
 };
+
+
+
+
+
+
+

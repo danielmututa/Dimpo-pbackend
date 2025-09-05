@@ -1,14 +1,42 @@
+
+
+// import { z } from "zod";
+
+// export const reviewSchema = z.object({
+//   user_id: z.number(),
+//   product_id: z.number(),
+//   rating: z.number().min(1).max(5),
+//   comment: z.string().min(1),
+//   created_at: z.coerce.date().optional()
+// });
+
+
+
+
+
+
 import { z } from "zod";
 
 export const reviewSchema = z.object({
-    // id: z.number(),
-    user_id: z.number().nullable().optional(),
-    product_id: z.number().nullable().optional(),
-    rating: z.number().nullable().optional(),
-    comment: z.string().nullable().optional(),
-    created_at: z.coerce.date().optional()
-  });
-  
+  user_id: z.number(),
+  product_id: z.number(),
+  rating: z.number().min(1).max(5),
+  comment: z.string().min(1),
+  created_at: z.coerce.date().optional()
+});
 
+export const reviewLikeSchema = z.object({
+  user_id: z.number(),
+  is_like: z.boolean()
+});
 
+export const reviewCommentSchema = z.object({
+  user_id: z.number().optional(),
+  comment: z.string().min(1)
+});
 
+export const productViewSchema = z.object({
+  user_id: z.number().optional(),
+  ip_address: z.string().optional(),
+  user_agent: z.string().optional()
+});
