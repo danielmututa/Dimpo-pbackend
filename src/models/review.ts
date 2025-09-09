@@ -22,6 +22,7 @@ export const reviewSchema = z.object({
   product_id: z.number(),
   rating: z.number().min(1).max(5),
   comment: z.string().min(1),
+    username: z.string().default("Anonymous"),
   created_at: z.coerce.date().optional()
 });
 
@@ -32,11 +33,13 @@ export const reviewLikeSchema = z.object({
 
 export const reviewCommentSchema = z.object({
   user_id: z.number().optional(),
-  comment: z.string().min(1)
+  comment: z.string().min(1),
+   username: z.string().default("Anonymous") // ✅ added username 
 });
 
 export const productViewSchema = z.object({
   user_id: z.number().optional(),
   ip_address: z.string().optional(),
-  user_agent: z.string().optional()
+  user_agent: z.string().optional(),
+   username: z.string().default("Anonymous")
 });

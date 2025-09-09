@@ -10,6 +10,36 @@ import * as authService from '../../services/auth'; // Updated import path
 import { generateToken } from '../../utils/jwt';
 import { users } from '@prisma/client';
 
+// export const register = async (request: FastifyRequest, reply: FastifyReply) => {
+//   try {
+//     const validatedData = registerSchema.parse(request.body);
+//     const user = await authService.registerUser(validatedData);
+    
+//     const token = generateToken(user);
+    
+//     reply.code(201).send({
+//       success: true,
+//       data: {
+//         user: {
+//           id: user.id,
+//           username: user.username,
+//           email: user.email,
+//           role: user.role
+//         },
+//         token
+//       }
+//     });
+//   } catch (error: any) {
+//     reply.code(400).send({
+//       success: false,
+//       error: error.message || 'Registration failed'
+//     });
+//   }
+// };
+
+
+
+// In your register controller
 export const register = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const validatedData = registerSchema.parse(request.body);
@@ -24,6 +54,7 @@ export const register = async (request: FastifyRequest, reply: FastifyReply) => 
           id: user.id,
           username: user.username,
           email: user.email,
+          phone: user.phone, // Include phone in response
           role: user.role
         },
         token
@@ -36,6 +67,7 @@ export const register = async (request: FastifyRequest, reply: FastifyReply) => 
     });
   }
 };
+
 
 export const login = async (request: FastifyRequest, reply: FastifyReply) => {
   try {

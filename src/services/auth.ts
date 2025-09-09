@@ -13,38 +13,175 @@ import {
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
-export const registerUser = async (data: typeof registerSchema._type): Promise<users> => {
-  const { username, email, password } = registerSchema.parse(data); // Validate with Zod
+// export const registerUser = async (data: typeof registerSchema._type): Promise<users> => {
+//   const { username, email, password } = registerSchema.parse(data); // Validate with Zod
   
-  // Check if user already exists
+//   // Check if user already exists
+//   const existingUser = await prisma.users.findFirst({
+//     where: {
+//       OR: [
+//         { username },
+//         { email }
+//       ]
+//     }
+//   });
+  
+//   if (existingUser) {
+//     throw new Error('Username or email already in use');
+//   }
+  
+//   // Hash password
+//   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  
+//   // Create user
+//   const user = await prisma.users.create({
+//     data: {
+//       username,
+//       email,
+//       password_hash: hashedPassword,
+//       role: 'user' // Default role
+//     }
+//   });
+  
+//   return user;
+// };
+
+
+// src/services/authService.ts
+
+
+// export const registerUser = async (data: typeof registerSchema._type): Promise<users> => {
+//   const { username, email, password, phone } = registerSchema.parse(data); // Include phone
+  
+//   // Check if user already exists (add phone check)
+//   const existingUser = await prisma.users.findFirst({
+//     where: {
+//       OR: [
+//         { username },
+//         { email },
+//         { phone } // Check if phone already exists
+//       ]
+//     }
+//   });
+  
+//   if (existingUser) {
+//     if (existingUser.username === username) throw new Error('Username already in use');
+//     if (existingUser.email === email) throw new Error('Email already in use');
+//     if (existingUser.phone === phone) throw new Error('Phone number already in use');
+//   }
+  
+//   // Hash password
+//   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  
+//   // Create user with phone
+//   const user = await prisma.users.create({
+//     data: {
+//       username,
+//       email,
+//       phone, // Add phone here
+//       password_hash: hashedPassword,
+//       role: 'user' // Default role
+//     }
+//   });
+  
+//   return user;
+// };
+
+
+// src/services/authService.ts
+export const registerUser = async (data: typeof registerSchema._type): Promise<users> => {
+   console.log('Registration data received:', data); // Add this
+  const { username, email, password, phone, role } = registerSchema.parse(data); // Include role
+    console.log('Role being used:', role); // Add this
+
+
+  // Check if user already exists (add phone check)
   const existingUser = await prisma.users.findFirst({
     where: {
       OR: [
         { username },
-        { email }
+        { email },
+        { phone }
       ]
     }
   });
   
   if (existingUser) {
-    throw new Error('Username or email already in use');
+    if (existingUser.username === username) throw new Error('Username already in use');
+    if (existingUser.email === email) throw new Error('Email already in use');
+    if (existingUser.phone === phone) throw new Error('Phone number already in use');
   }
   
   // Hash password
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
   
-  // Create user
+  // Create user with phone and role
   const user = await prisma.users.create({
     data: {
       username,
       email,
+      phone,
       password_hash: hashedPassword,
-      role: 'user' // Default role
+      role: role, // Use the provided role instead of hardcoding 'user'
     }
   });
   
   return user;
 };
+
+
+
+// Update getUser function to handle nullable phone
+export const getUser = async (identifier: { 
+  username?: string | undefined; 
+  email?: string | undefined;
+  phone?: string | undefined; // Add phone option
+}): Promise<{ username: string; email: string; phone: string | null } | null> => { // Change phone to string | null
+  const user = await prisma.users.findFirst({
+    where: {
+      OR: [
+        identifier.username !== undefined ? { username: identifier.username } : {},
+        identifier.email !== undefined ? { email: identifier.email } : {},
+        identifier.phone !== undefined ? { phone: identifier.phone } : {} // Add phone search
+      ].filter(Boolean)
+    },
+    select: {
+      username: true,
+      email: true,
+      phone: true // Include phone in response
+    }
+  });
+  
+  if (!user) {
+    return null; 
+  }
+  
+  return user;
+};
+
+
+
+// Update getAllUsers to include phone
+export const getAllUsers = async (): Promise<Pick<users, 'id' | 'username' | 'email' | 'phone' | 'role' | 'created_at' | 'updated_at'>[]> => {
+  const users = await prisma.users.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      phone: true, // Add phone
+      role: true,
+      created_at: true,
+      updated_at: true
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  
+  return users;
+};
+
+
 
 export const loginUser = async (data: typeof loginSchema._type): Promise<users> => {
   const { email, password } = loginSchema.parse(data); // Validate with Zod
@@ -196,29 +333,31 @@ if (!tokenExists) {
 };
 
 // Updated function to get a user by username or email
-export const getUser = async (identifier: { username?: string | undefined; email?: string | undefined }): Promise<{ username: string; email: string } | null> => {
-  const user = await prisma.users.findFirst({
-    where: {
-      OR: [
-        identifier.username !== undefined ? { username: identifier.username } : {},
-        identifier.email !== undefined ? { email: identifier.email } : {}
-      ].filter(Boolean) as { username?: string }[] | { email?: string }[] // Ensure type safety
-    },
-    select: {
-      username: true,
-      email: true
-    }
-  });
+// export const getUser = async (identifier: { username?: string | undefined; email?: string | undefined }): Promise<{ username: string; email: string } | null> => {
+//   const user = await prisma.users.findFirst({
+//     where: {
+//       OR: [
+//         identifier.username !== undefined ? { username: identifier.username } : {},
+//         identifier.email !== undefined ? { email: identifier.email } : {}
+//       ].filter(Boolean) as { username?: string }[] | { email?: string }[] // Ensure type safety
+//     },
+//     select: {
+//       username: true,
+//       email: true
+//     }
+//   });
   
-  if (!user) {
-    return null; 
-  }
+//   if (!user) {
+//     return null; 
+//   }
   
-  return user;
-};
+//   return user;
+// };
 
 
-// export const getAllUsers = async (): Promise<users[]> => {
+
+
+// export const getAllUsers = async (): Promise<Pick<users, 'id' | 'username' | 'email' | 'role' | 'created_at' | 'updated_at'>[]> => {
 //   const users = await prisma.users.findMany({
 //     select: {
 //       id: true,
@@ -227,7 +366,7 @@ export const getUser = async (identifier: { username?: string | undefined; email
 //       role: true,
 //       created_at: true,
 //       updated_at: true
-//       // Exclude password_hash for security
+//       // Explicitly exclude sensitive fields
 //     },
 //     orderBy: {
 //       created_at: 'desc'
@@ -236,26 +375,6 @@ export const getUser = async (identifier: { username?: string | undefined; email
   
 //   return users;
 // };
-
-// src/services/auth.ts
-export const getAllUsers = async (): Promise<Pick<users, 'id' | 'username' | 'email' | 'role' | 'created_at' | 'updated_at'>[]> => {
-  const users = await prisma.users.findMany({
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      role: true,
-      created_at: true,
-      updated_at: true
-      // Explicitly exclude sensitive fields
-    },
-    orderBy: {
-      created_at: 'desc'
-    }
-  });
-  
-  return users;
-};
 
 export const deleteUser = async (userId: number): Promise<void> => {
   // First check if user exists

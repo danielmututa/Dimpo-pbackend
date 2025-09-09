@@ -607,16 +607,407 @@ export const getAllProductImages = async () => {
 
 
 
+// export class ReviewService {
+//   static async addReview(
+//     productId: number,
+//     data: { user_id?: number; rating: number; comment: string }
+//   ) {
+//     return await prisma.reviews.create({
+//       data: {
+//         product_id: productId,
+//         user_id: data.user_id ?? null,
+//         rating: data.rating,
+//       username: data.username || "Anonymous", // ✅ save username
+//         comment: data.comment,
+//         created_at: new Date(),
+//       },
+//     });
+//   }
+
+//   // static async getProductReviews(productId: number) {
+//   //   const reviews = await prisma.reviews.findMany({
+//   //     where: { product_id: productId },
+//   //     include: {
+//   //       users: {
+//   //         select: {
+//   //           id: true,
+//   //           username: true,
+//   //           email: true
+//   //         }
+//   //       },
+//   //       review_likes: {
+//   //         include: {
+//   //           users: {
+//   //             select: { id: true, username: true }
+//   //           }
+//   //         }
+//   //       },
+//   //       review_comments: {
+//   //         include: {
+//   //           users: {
+//   //             select: { id: true, username: true }
+//   //           }
+//   //         },
+//   //         orderBy: { created_at: "desc" }
+//   //       }
+//   //     },
+//   //     orderBy: { created_at: "desc" },
+//   //   });
+
+//   //   // Add like/dislike counts to each review
+//   //   return reviews.map(review => ({
+//   //     ...review,
+//   //     likes_count: review.review_likes.filter(like => like.is_like === true).length,
+//   //     dislikes_count: review.review_likes.filter(like => like.is_like === false).length,
+//   //     comments_count: review.review_comments.length
+//   //   }));
+//   // }
+
+
+
+// static async getProductReviews(productId: number) {
+//   const reviews = await prisma.reviews.findMany({
+//     where: { product_id: productId },
+//     include: {
+//       users: {
+//         select: {
+//           id: true,
+//           username: true,
+//           email: true
+//         }
+//       },
+//       review_likes: {
+//         include: {
+//           users: {
+//             select: { id: true, username: true }
+//           }
+//         }
+//       },
+//       review_comments: {
+//         include: {
+//           users: {
+//             select: { id: true, username: true }
+//           }
+//         },
+//         orderBy: { created_at: "desc" }
+//       }
+//     },
+//     orderBy: { created_at: "desc" },
+//   });
+
+//   // Add like/dislike counts and expose username
+//   return reviews.map(review => ({
+//     ...review,
+//     // username from the new column OR from related user
+//     username: review.username || review.users?.username || "Anonymous",
+//     likes_count: review.review_likes.filter(like => like.is_like === true).length,
+//     dislikes_count: review.review_likes.filter(like => like.is_like === false).length,
+//     comments_count: review.review_comments.length
+//   }));
+// }
+
+
+
+//   static async deleteReview(reviewId: number, userId?: number) {
+//     const review = await prisma.reviews.findUnique({
+//       where: { id: reviewId }
+//     });
+    
+//     if (!review || (userId && review.user_id !== userId)) {
+//       throw new Error("Not authorized to delete this review");
+//     }
+    
+//     return await prisma.reviews.delete({
+//       where: { id: reviewId }
+//     });
+//   }
+// }
+
+// export class ReviewLikeService {
+//   static async toggleReviewLike(
+//     reviewId: number,
+//     userId: number,
+//     isLike: boolean
+//   ) {
+//     const existing = await prisma.review_likes.findUnique({
+//       where: {
+//         review_id_user_id: {
+//           review_id: reviewId,
+//           user_id: userId
+//         }
+//       }
+//     });
+
+//     if (existing) {
+//       if (existing.is_like === isLike) {
+//         return await prisma.review_likes.delete({
+//           where: { id: existing.id }
+//         });
+//       } else {
+//         return await prisma.review_likes.update({
+//           where: { id: existing.id },
+//           data: { is_like: isLike }
+//         });
+//       }
+//     } else {
+//       return await prisma.review_likes.create({
+//         data: {
+//           review_id: reviewId,
+//           user_id: userId,
+//           is_like: isLike
+//         }
+//       });
+//     }
+//   }
+
+//   static async getReviewLikeStatus(reviewId: number, userId: number) {
+//     const like = await prisma.review_likes.findUnique({
+//       where: {
+//         review_id_user_id: {
+//           review_id: reviewId,
+//           user_id: userId
+//         }
+//       }
+//     });
+    
+//     return like ? like.is_like : null;
+//   }
+// }
+
+// export class ReviewCommentService {
+//   static async addReviewComment(
+//     reviewId: number,
+//     data: { user_id?: number; comment: string }
+//   ) {
+//     return await prisma.review_comments.create({
+//       data: {
+//         review_id: reviewId,
+//         user_id: data.user_id ?? null,
+//         comment: data.comment,
+//         username: data.username || "Anonymous", // ✅ consistent
+//         created_at: new Date(),
+//       },
+//       include: {
+//         users: {
+//           select: { id: true, username: true }
+//         }
+//       }
+//     });
+//   }
+
+//   // static async getReviewComments(reviewId: number) {
+//   //   return await prisma.review_comments.findMany({
+//   //     where: { review_id: reviewId },
+//   //     include: {
+//   //       users: {
+//   //         select: { id: true, username: true }
+//   //       }
+//   //     },
+//   //     orderBy: { created_at: "desc" }
+//   //   });
+//   // }
+
+
+
+// static async getReviewComments(reviewId: number) {
+//   const comments = await prisma.review_comments.findMany({
+//     where: { review_id: reviewId },
+//     include: {
+//       users: {
+//         select: { id: true, username: true }
+//       }
+//     },
+//     orderBy: { created_at: "desc" }
+//   });
+
+
+//   return comments.map(comment => ({
+//     ...comment,
+//     username: comment.username || comment.users?.username || "Anonymous"
+//   }));
+// }
+
+
+
+
+//   static async deleteReviewComment(commentId: number, userId?: number) {
+//     const comment = await prisma.review_comments.findUnique({
+//       where: { id: commentId }
+//     });
+    
+//     if (!comment || (userId && comment.user_id !== userId)) {
+//       throw new Error("Not authorized to delete this comment");
+//     }
+    
+//     return await prisma.review_comments.delete({
+//       where: { id: commentId }
+//     });
+//   }
+// }
+
+// export class ProductViewService {
+//   static async trackProductView(
+//     productId: number,
+//     data: { 
+//       user_id?: number; 
+//       ip_address?: string; 
+//       user_agent?: string 
+//     }
+//   ) {
+//     try {
+//       // Build the OR conditions array properly
+//       const orConditions: any[] = [];
+      
+//       if (data.user_id !== undefined) {
+//         orConditions.push({ user_id: data.user_id });
+//       }
+      
+//       if (data.ip_address !== undefined) {
+//         orConditions.push({ ip_address: data.ip_address });
+//       }
+
+//       const existingView = await prisma.product_views.findFirst({
+//         where: {
+//           product_id: productId,
+//           ...(orConditions.length > 0 && { OR: orConditions }),
+//           viewed_at: {
+//             gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+//           }
+//         }
+//       });
+
+//       if (!existingView) {
+//         return await prisma.product_views.create({
+//           data: {
+//             product_id: productId,
+//             user_id: data.user_id ?? null,
+//             ip_address: data.ip_address ?? null,
+//             user_agent: data.user_agent ?? null,
+//             viewed_at: new Date(),
+//           },
+//         });
+//       }
+      
+//       return null;
+//     } catch (error) {
+//       console.log('View already tracked:', error);
+//       return null;
+//     }
+//   }
+
+//   static async getProductViewCount(productId: number) {
+//     const totalViews = await prisma.product_views.count({
+//       where: { product_id: productId }
+//     });
+
+//     // Fixed: Remove distinct for count operation
+//     const uniqueUsers = await prisma.product_views.groupBy({
+//       by: ['user_id'],
+//       where: { 
+//         product_id: productId,
+//         user_id: { not: null }
+//       }
+//     });
+
+//     const todayViews = await prisma.product_views.count({
+//       where: {
+//         product_id: productId,
+//         viewed_at: {
+//           gte: new Date(new Date().setHours(0, 0, 0, 0))
+//         }
+//       }
+//     });
+
+//     const weekViews = await prisma.product_views.count({
+//       where: {
+//         product_id: productId,
+//         viewed_at: {
+//           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+//         }
+//       }
+//     });
+
+//     return {
+//       total_views: totalViews,
+//       unique_users: uniqueUsers.length, // Count the grouped results
+//       today_views: todayViews,
+//       week_views: weekViews
+//     };
+//   }
+
+//   static async getProductWithViews(productId: number) {
+//     return await prisma.products.findUnique({
+//       where: { id: productId },
+//       include: {
+//         product_views: {
+//           select: {
+//             id: true,
+//             viewed_at: true,
+//             users: {
+//               select: {
+//                 id: true,
+//                 username: true
+//               }
+//             }
+//           },
+//           orderBy: { viewed_at: 'desc' },
+//           take: 10
+//         },
+//         _count: {
+//           select: {
+//             product_views: true,
+//             reviews: true
+//           }
+//         }
+//       }
+//     });
+//   }
+
+//   static async getMostViewedProducts(limit: number = 10) {
+//     return await prisma.products.findMany({
+//       include: {
+//         _count: {
+//           select: {
+//             product_views: true,
+//             reviews: true
+//           }
+//         }
+//       },
+//       orderBy: {
+//         product_views: {
+//           _count: 'desc'
+//         }
+//       },
+//       take: limit
+//     });
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export class ReviewService {
   static async addReview(
     productId: number,
-    data: { user_id?: number; rating: number; comment: string }
+    data: { user_id?: number; rating: number; comment: string; username?: string }
   ) {
     return await prisma.reviews.create({
       data: {
         product_id: productId,
         user_id: data.user_id ?? null,
         rating: data.rating,
+        username: data.username || "Anonymous",
         comment: data.comment,
         created_at: new Date(),
       },
@@ -653,9 +1044,9 @@ export class ReviewService {
       orderBy: { created_at: "desc" },
     });
 
-    // Add like/dislike counts to each review
     return reviews.map(review => ({
       ...review,
+      username: review.username || review.users?.username || "Anonymous",
       likes_count: review.review_likes.filter(like => like.is_like === true).length,
       dislikes_count: review.review_likes.filter(like => like.is_like === false).length,
       comments_count: review.review_comments.length
@@ -731,13 +1122,14 @@ export class ReviewLikeService {
 export class ReviewCommentService {
   static async addReviewComment(
     reviewId: number,
-    data: { user_id?: number; comment: string }
+    data: { user_id?: number; comment: string; username?: string }
   ) {
     return await prisma.review_comments.create({
       data: {
         review_id: reviewId,
         user_id: data.user_id ?? null,
         comment: data.comment,
+        username: data.username || "Anonymous",
         created_at: new Date(),
       },
       include: {
@@ -749,7 +1141,7 @@ export class ReviewCommentService {
   }
 
   static async getReviewComments(reviewId: number) {
-    return await prisma.review_comments.findMany({
+    const comments = await prisma.review_comments.findMany({
       where: { review_id: reviewId },
       include: {
         users: {
@@ -758,6 +1150,11 @@ export class ReviewCommentService {
       },
       orderBy: { created_at: "desc" }
     });
+
+    return comments.map(comment => ({
+      ...comment,
+      username: comment.username || comment.users?.username || "Anonymous"
+    }));
   }
 
   static async deleteReviewComment(commentId: number, userId?: number) {
@@ -781,11 +1178,11 @@ export class ProductViewService {
     data: { 
       user_id?: number; 
       ip_address?: string; 
-      user_agent?: string 
+      user_agent?: string;
+      username?: string;
     }
   ) {
     try {
-      // Build the OR conditions array properly
       const orConditions: any[] = [];
       
       if (data.user_id !== undefined) {
@@ -813,6 +1210,7 @@ export class ProductViewService {
             user_id: data.user_id ?? null,
             ip_address: data.ip_address ?? null,
             user_agent: data.user_agent ?? null,
+            username: data.username || "Anonymous",
             viewed_at: new Date(),
           },
         });
@@ -830,7 +1228,6 @@ export class ProductViewService {
       where: { product_id: productId }
     });
 
-    // Fixed: Remove distinct for count operation
     const uniqueUsers = await prisma.product_views.groupBy({
       by: ['user_id'],
       where: { 
@@ -859,7 +1256,7 @@ export class ProductViewService {
 
     return {
       total_views: totalViews,
-      unique_users: uniqueUsers.length, // Count the grouped results
+      unique_users: uniqueUsers.length,
       today_views: todayViews,
       week_views: weekViews
     };
